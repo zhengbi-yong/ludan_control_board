@@ -15,7 +15,7 @@ uint8_t g_Can3RxData[64];
 void FDCAN1_Config(void) {
   FDCAN_FilterTypeDef sFilterConfig;
   /* Configure Rx filter */
-  sFilterConfig.IdType = FDCAN_STANDARD_ID; // ��չID������
+  sFilterConfig.IdType = FDCAN_STANDARD_ID;
   sFilterConfig.FilterIndex = 0;
   sFilterConfig.FilterType = FDCAN_FILTER_MASK;
   sFilterConfig.FilterConfig = FDCAN_FILTER_TO_RXFIFO0;
@@ -25,12 +25,6 @@ void FDCAN1_Config(void) {
     Error_Handler();
   }
 
-  /* ȫ�ֹ������� */
-  /* ���յ���ϢID���׼ID���˲�ƥ�䣬������
-   */
-  /* ���յ���ϢID����չID���˲�ƥ�䣬������ */
-  /* ���˱�׼IDԶ��֡ */
-  /* ������չIDԶ��֡ */
   if (HAL_FDCAN_ConfigGlobalFilter(&hfdcan1, FDCAN_REJECT, FDCAN_REJECT,
                                    FDCAN_FILTER_REMOTE,
                                    FDCAN_FILTER_REMOTE) != HAL_OK) {
@@ -40,7 +34,6 @@ void FDCAN1_Config(void) {
     Error_Handler();
   }
 
-  /* ����RX FIFO0���������ж� */
   if (HAL_FDCAN_ActivateNotification(&hfdcan1, FDCAN_IT_RX_FIFO0_NEW_MESSAGE,
                                      0) != HAL_OK) {
     Error_Handler();
@@ -105,7 +98,7 @@ uint8_t canx_send_data(FDCAN_HandleTypeDef *hcan, uint16_t id, uint8_t *data,
   TxHeader.IdType = FDCAN_STANDARD_ID;
   TxHeader.TxFrameType = FDCAN_DATA_FRAME;
   if (len <= 8) {
-    TxHeader.DataLength = len; // ���ͳ��ȣ�8byte
+    TxHeader.DataLength = len;
   } else if (len == 12) {
     TxHeader.DataLength = FDCAN_DLC_BYTES_12;
   } else if (len == 16) {
@@ -125,9 +118,8 @@ uint8_t canx_send_data(FDCAN_HandleTypeDef *hcan, uint16_t id, uint8_t *data,
   TxHeader.BitRateSwitch = FDCAN_BRS_ON;
   TxHeader.FDFormat = FDCAN_FD_CAN; // CANFD
   TxHeader.TxEventFifoControl = FDCAN_NO_TX_EVENTS;
-  TxHeader.MessageMarker = 0; // ��Ϣ���
+  TxHeader.MessageMarker = 0;
 
-  // ����CANָ��
   HAL_FDCAN_AddMessageToTxFifoQ(hcan, &TxHeader, data);
   return 0;
 }
@@ -141,10 +133,10 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan,
   if ((RxFifo0ITs & FDCAN_IT_RX_FIFO0_NEW_MESSAGE) != RESET) {
     if (hfdcan->Instance == FDCAN1) {
       /* Retrieve Rx messages from RX FIFO0 */
-      memset(g_Can1RxData, 0, sizeof(g_Can1RxData)); // ����ǰ���������
+      memset(g_Can1RxData, 0, sizeof(g_Can1RxData));
       HAL_FDCAN_GetRxMessage(hfdcan, FDCAN_RX_FIFO0, &RxHeader1, g_Can1RxData);
 
-      switch (RxHeader1.Identifier) { // ����
+      switch (RxHeader1.Identifier) {
       case 0x19:
         dm4340_fbdata(&chassis_move.joint_motor[13], g_Can1RxData,
                       RxHeader1.DataLength);
@@ -290,7 +282,7 @@ void bsp_fdcan_set_baud(hcan_t *hfdcan, uint8_t mode, uint8_t baud) {
     dat_brp = 1;
     dat_seg1 = 29;
     dat_seg2 = 10;
-    dat_sjw = 10; // ������Ĭ��1M
+    dat_sjw = 10;
     hfdcan->Init.FrameFormat = FDCAN_FRAME_CLASSIC;
   }
   /*	data_baud	 = 80M/brp/(1+seg1+seg2)
@@ -335,7 +327,7 @@ void bsp_fdcan_set_baud(hcan_t *hfdcan, uint8_t mode, uint8_t baud) {
     nom_brp = 1;
     nom_seg1 = 59;
     nom_seg2 = 20;
-    nom_sjw = 20; // �ٲ���Ĭ��1M
+    nom_sjw = 20;
     hfdcan->Init.FrameFormat = FDCAN_FRAME_FD_BRS;
   }
 

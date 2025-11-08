@@ -28,7 +28,7 @@ extern send_data_t send_data;
 #define LOAD_LENGTH 71
 extern chassis_t chassis_move;
 
-uint32_t OBSERVE_TIME = 1; // ����������3ms
+uint32_t OBSERVE_TIME = 1;
 
 void observe_task_(void) {
   while (1) {
