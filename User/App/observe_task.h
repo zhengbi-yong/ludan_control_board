@@ -5,6 +5,6 @@
 #include "main.h"
 #include "stdint.h"
 
-extern void Connect_task(void);
+extern void observe_task_(void);
 
 #endif

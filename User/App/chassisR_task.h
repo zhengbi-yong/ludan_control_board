@@ -7,7 +7,7 @@
 typedef struct {
   Joint_Motor_t joint_motor[14];
 
-  uint8_t start_flag; // ������־
+  uint8_t start_flag;
 
 } chassis_t;
 

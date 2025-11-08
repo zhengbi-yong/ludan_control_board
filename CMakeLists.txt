@@ -69,7 +69,7 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     User/App/ChassisR_task.c
     User/App/ChassisL_task.c
     User/App/vbus_check.c
-    User/App/connect_task.c
+    User/App/observe_task.c
     User/Devices/DM_Motor/motor_config.c
     User/Bsp/bsp_dwt.c
     User/Bsp/bsp_PWM.c

@@ -1,7 +1,7 @@
 /**
   *********************************************************************
   * @file      observe_task.c/h
-  * @brief     �������ǶԻ����˶��ٶȹ��ƣ��������ƴ�
+  * @brief
   * @note
   * @history
   *
@@ -13,7 +13,7 @@
   *********************************************************************
   */
 
-#include "connect_task.h"
+#include "observe_task.h"
 
 #include "bsp_usart1.h"
 #include "cmsis_os.h"
@@ -30,7 +30,7 @@ extern chassis_t chassis_move;
 
 uint32_t OBSERVE_TIME = 1; // ����������3ms
 
-void Connect_task(void) {
+void observe_task_(void) {
   while (1) {
     send_data.tx[0] = FRAME_HEADER;
     for (int i = 0; i < MOTOR_NUM; i++) {
