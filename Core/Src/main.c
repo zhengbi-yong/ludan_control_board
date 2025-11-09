@@ -120,6 +120,7 @@ int main(void)
   // Buzzer_ON();
   // HAL_Delay(100);
   // Buzzer_OFF();
+  /*打开供电开关*/
   Power_OUT1_ON();
   Power_OUT2_ON();
 

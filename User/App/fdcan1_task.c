@@ -1,7 +1,7 @@
 /**
   *********************************************************************
-  * @file      chassisR_task.c/h
-  * @brief     该任务控制右腿的五个电机，都是DM4340，这五个电机挂载在can1总线上
+  * @file      fdcan1_task.c/h
+  * @brief     该任务控制can1总线上的电机
   * @note
   * @history
   *
@@ -13,7 +13,7 @@
   *********************************************************************
   */
 
-#include "chassisR_task.h"
+#include "fdcan1_task.h"
 #include "cmsis_os.h"
 #include "fdcan.h"
 
@@ -27,10 +27,10 @@ float my_kp2 = 0.0f;
 float my_pos2 = 0.0f;
 float my_tor2 = 0.0f;
 int a = 0;
-void ChassisR_task(void) {
+void fdcan1_task_(void) {
   chassis_move.start_flag = 1;
   osDelay(2000);
-  ChassisR_init(&chassis_move);
+  fdcan1_init(&chassis_move);
 
   dm6248p_fbdata_init(&chassis_move.joint_motor[7]);
   dm6248p_fbdata_init(&chassis_move.joint_motor[8]);
@@ -78,7 +78,7 @@ void ChassisR_task(void) {
   }
 }
 
-void ChassisR_init(chassis_t *chassis) {
+void fdcan1_init(chassis_t *chassis) {
   joint_motor_init(&chassis->joint_motor[7], 1, MIT_MODE);
   joint_motor_init(&chassis->joint_motor[8], 0x2, MIT_MODE);
   joint_motor_init(&chassis->joint_motor[9], 0xA, MIT_MODE);
@@ -123,35 +123,6 @@ void ChassisR_init(chassis_t *chassis) {
     osDelay(100);
   }
 }
-
-/*
-void ChassisR_init(chassis_t *chassis)
-{
-    // 初始化所有电机的参数结构体
-    joint_motor_init(&chassis->joint_motor[7], 1, MIT_MODE);
-    joint_motor_init(&chassis->joint_motor[8], 2, MIT_MODE);
-    joint_motor_init(&chassis->joint_motor[9], 3, MIT_MODE);
-    joint_motor_init(&chassis->joint_motor[10], 5, MIT_MODE);
-    joint_motor_init(&chassis->joint_motor[11], 7, MIT_MODE);
-    joint_motor_init(&chassis->joint_motor[12], 8, MIT_MODE);
-    joint_motor_init(&chassis->joint_motor[13], 9, MIT_MODE);
-
-    // 短暂延时，确保系统稳定
-    osDelay(100);
-
-    // 循环为所有电机发送一次使能指令
-    // 注意：这里的数组索引是从7到13
-    for(int i = 7; i <= 13; i++)
-    {
-        enable_motor_mode(&hfdcan1, chassis->joint_motor[i].para.id,
-chassis->joint_motor[i].mode); osDelay(20); //
-留出20ms的间隔，防止CAN总线拥堵，也给电机响应时间
-    }
-
-    // 在这里，最好能有一个机制来查询并确认所有电机都已进入MIT模式
-    // (这需要你的驱动库支持读取电机状态的功能)
-}
-*/
 
 void mySaturate(float *in, float min, float max) {
   if (*in < min) {

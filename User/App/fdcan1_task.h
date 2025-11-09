@@ -1,5 +1,5 @@
-#ifndef __CHASSISR_TASK_H
-#define __CHASSISR_TASK_H
+#ifndef __FDCAN1_TASK_H
+#define __FDCAN1_TASK_H
 
 #include "main.h"
 #include "motor_config.h"
@@ -11,8 +11,8 @@ typedef struct {
 
 } chassis_t;
 
-extern void ChassisR_init(chassis_t *chassis);
-extern void ChassisR_task(void);
+extern void fdcan1_init(chassis_t *chassis);
+extern void fdcan1_task_(void);
 
 extern void mySaturate(float *in, float min, float max);
 

@@ -19,15 +19,15 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "FreeRTOS.h"
-#include "task.h"
-#include "main.h"
 #include "cmsis_os.h"
+#include "main.h"
+#include "task.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
 #include "chassisL_task.h"
-#include "chassisR_task.h"
+#include "fdcan1_task.h"
 #include "gpio.h"
 #include "observe_task.h"
 #include "tim.h"
@@ -58,37 +58,37 @@
 /* Definitions for defaultTask */
 osThreadId_t defaultTaskHandle;
 const osThreadAttr_t defaultTask_attributes = {
-  .name = "defaultTask",
-  .stack_size = 512 * 4,
-  .priority = (osPriority_t) osPriorityNormal,
+    .name = "defaultTask",
+    .stack_size = 512 * 4,
+    .priority = (osPriority_t)osPriorityNormal,
 };
-/* Definitions for CHASSISR_TASK */
-osThreadId_t CHASSISR_TASKHandle;
-const osThreadAttr_t CHASSISR_TASK_attributes = {
-  .name = "CHASSISR_TASK",
-  .stack_size = 512 * 4,
-  .priority = (osPriority_t) osPriorityHigh,
+/* Definitions for FDCAN1_TASK */
+osThreadId_t FDCAN1_TASKHandle;
+const osThreadAttr_t FDCAN1_TASK_attributes = {
+    .name = "FDCAN1_TASK",
+    .stack_size = 512 * 4,
+    .priority = (osPriority_t)osPriorityHigh,
 };
 /* Definitions for OBSERVE_TASK */
 osThreadId_t OBSERVE_TASKHandle;
 const osThreadAttr_t OBSERVE_TASK_attributes = {
-  .name = "OBSERVE_TASK",
-  .stack_size = 512 * 4,
-  .priority = (osPriority_t) osPriorityHigh,
+    .name = "OBSERVE_TASK",
+    .stack_size = 512 * 4,
+    .priority = (osPriority_t)osPriorityHigh,
 };
 /* Definitions for CHASSISL_TASK */
 osThreadId_t CHASSISL_TASKHandle;
 const osThreadAttr_t CHASSISL_TASK_attributes = {
-  .name = "CHASSISL_TASK",
-  .stack_size = 512 * 4,
-  .priority = (osPriority_t) osPriorityHigh,
+    .name = "CHASSISL_TASK",
+    .stack_size = 512 * 4,
+    .priority = (osPriority_t)osPriorityHigh,
 };
 /* Definitions for VBUS_CHECK_TASK */
 osThreadId_t VBUS_CHECK_TASKHandle;
 const osThreadAttr_t VBUS_CHECK_TASK_attributes = {
-  .name = "VBUS_CHECK_TASK",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityNormal,
+    .name = "VBUS_CHECK_TASK",
+    .stack_size = 128 * 4,
+    .priority = (osPriority_t)osPriorityNormal,
 };
 
 /* Private function prototypes -----------------------------------------------*/
@@ -97,7 +97,7 @@ const osThreadAttr_t VBUS_CHECK_TASK_attributes = {
 /* USER CODE END FunctionPrototypes */
 
 void StartDefaultTask(void *argument);
-void ChassisR_Task(void *argument);
+void fdcan1_task(void *argument);
 void observe_task(void *argument);
 void ChassisL_Task(void *argument);
 void VBUS_CheckTask(void *argument);
@@ -106,10 +106,10 @@ extern void MX_USB_DEVICE_Init(void);
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
 /**
-  * @brief  FreeRTOS initialization
-  * @param  None
-  * @retval None
-  */
+ * @brief  FreeRTOS initialization
+ * @param  None
+ * @retval None
+ */
 void MX_FREERTOS_Init(void) {
   /* USER CODE BEGIN Init */
 
@@ -133,19 +133,23 @@ void MX_FREERTOS_Init(void) {
 
   /* Create the thread(s) */
   /* creation of defaultTask */
-  defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
+  defaultTaskHandle =
+      osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
 
-  /* creation of CHASSISR_TASK */
-  CHASSISR_TASKHandle = osThreadNew(ChassisR_Task, NULL, &CHASSISR_TASK_attributes);
+  /* creation of FDCAN1_TASK */
+  FDCAN1_TASKHandle = osThreadNew(fdcan1_task, NULL, &FDCAN1_TASK_attributes);
 
   /* creation of OBSERVE_TASK */
-  OBSERVE_TASKHandle = osThreadNew(observe_task, NULL, &OBSERVE_TASK_attributes);
+  OBSERVE_TASKHandle =
+      osThreadNew(observe_task, NULL, &OBSERVE_TASK_attributes);
 
   /* creation of CHASSISL_TASK */
-  CHASSISL_TASKHandle = osThreadNew(ChassisL_Task, NULL, &CHASSISL_TASK_attributes);
+  CHASSISL_TASKHandle =
+      osThreadNew(ChassisL_Task, NULL, &CHASSISL_TASK_attributes);
 
   /* creation of VBUS_CHECK_TASK */
-  VBUS_CHECK_TASKHandle = osThreadNew(VBUS_CheckTask, NULL, &VBUS_CHECK_TASK_attributes);
+  VBUS_CHECK_TASKHandle =
+      osThreadNew(VBUS_CheckTask, NULL, &VBUS_CHECK_TASK_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -154,7 +158,6 @@ void MX_FREERTOS_Init(void) {
   /* USER CODE BEGIN RTOS_EVENTS */
   /* add events, ... */
   /* USER CODE END RTOS_EVENTS */
-
 }
 
 /* USER CODE BEGIN Header_StartDefaultTask */
@@ -164,8 +167,7 @@ void MX_FREERTOS_Init(void) {
  * @retval None
  */
 /* USER CODE END Header_StartDefaultTask */
-void StartDefaultTask(void *argument)
-{
+void StartDefaultTask(void *argument) {
   /* init code for USB_DEVICE */
   MX_USB_DEVICE_Init();
   /* USER CODE BEGIN StartDefaultTask */
@@ -176,21 +178,20 @@ void StartDefaultTask(void *argument)
   /* USER CODE END StartDefaultTask */
 }
 
-/* USER CODE BEGIN Header_ChassisR_Task */
+/* USER CODE BEGIN Header_fdcan1_task */
 /**
- * @brief Function implementing the CHASSISR_TASK thread.
+ * @brief Function implementing the FDCAN1_TASK thread.
  * @param argument: Not used
  * @retval None
  */
-/* USER CODE END Header_ChassisR_Task */
-void ChassisR_Task(void *argument)
-{
-  /* USER CODE BEGIN ChassisR_Task */
+/* USER CODE END Header_fdcan1_task */
+void fdcan1_task(void *argument) {
+  /* USER CODE BEGIN fdcan1_task */
   /* Infinite loop */
   for (;;) {
-    ChassisR_task();
+    fdcan1_task_();
   }
-  /* USER CODE END ChassisR_Task */
+  /* USER CODE END fdcan1_task */
 }
 
 /* USER CODE BEGIN Header_observe_task */
@@ -200,8 +201,7 @@ void ChassisR_Task(void *argument)
  * @retval None
  */
 /* USER CODE END Header_observe_task */
-void observe_task(void *argument)
-{
+void observe_task(void *argument) {
   /* USER CODE BEGIN observe_task */
   /* Infinite loop */
   for (;;) {
@@ -217,8 +217,7 @@ void observe_task(void *argument)
  * @retval None
  */
 /* USER CODE END Header_ChassisL_Task */
-void ChassisL_Task(void *argument)
-{
+void ChassisL_Task(void *argument) {
   /* USER CODE BEGIN ChassisL_Task */
   /* Infinite loop */
   for (;;) {
@@ -234,8 +233,7 @@ void ChassisL_Task(void *argument)
  * @retval None
  */
 /* USER CODE END Header_VBUS_CheckTask */
-void VBUS_CheckTask(void *argument)
-{
+void VBUS_CheckTask(void *argument) {
   /* USER CODE BEGIN VBUS_CheckTask */
   /* Infinite loop */
   for (;;) {
@@ -248,4 +246,3 @@ void VBUS_CheckTask(void *argument)
 /* USER CODE BEGIN Application */
 
 /* USER CODE END Application */
-

@@ -2,7 +2,6 @@
   *********************************************************************
   * @file      VBUS_Check_task.c/h
   * @brief
-  ���������ڼ���ص�ѹ������⵽��ص�ѹ����22Vʱ��ʧ�����е��
   * @note
   * @history
   *
@@ -18,9 +17,9 @@
 #include "cmsis_os.h"
 #include "gpio.h"
 
-#include "chassisR_task.h"
 #include "cmsis_os.h"
 #include "fdcan.h"
+#include "fdcan1_task.h"
 #include "tim.h"
 extern chassis_t chassis_move;
 // extern body_t robot_body;
@@ -44,17 +43,16 @@ void VBUS_Check_task(void) {
   while (1) {
     vbus = ((adc_val[1] + calibration_value) * 3.3f / 65535) * 11.0f;
 
-    if (6.0f < vbus && vbus < vbus_threhold_call) { // ��ص�ѹС��22.6V������������
+    if (6.0f < vbus && vbus < vbus_threhold_call) {
       Buzzer_ON();
     } else {
       Buzzer_OFF();
     }
-    if (6.0f < vbus && vbus < vbus_threhold_disable) { // ��ص�ѹС��22.2V��ʧ�ܵ��
+    if (6.0f < vbus && vbus < vbus_threhold_disable) {
       loss_voltage = 1;
       Power_OUT2_OFF();
       Power_OUT1_OFF();
 
-      // ��ص�ѹ���ˣ�ʧ�ܵ��
       for (int j = 0; j < 7; j++) {
         disable_motor_mode(&hfdcan1, chassis_move.joint_motor[7].para.id,
                            chassis_move.joint_motor[7].mode);

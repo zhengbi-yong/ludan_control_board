@@ -1,5 +1,5 @@
 #include "bsp_usart1.h"
-#include "chassisR_task.h"
+#include "fdcan1_task.h"
 
 extern UART_HandleTypeDef huart1;
 
@@ -8,81 +8,82 @@ send_data_t send_data2;
 
 rev_data_t rev_data;
 
+void connect_usart1_init(void) {
+  // ï¿½ï¿½ï¿½ï¿½ï¿½Ó¾ï¿½ï¿½ï¿½ï¿½ÚµÄ½ï¿½ï¿½ï¿½ï¿½Ð¶Ï£ï¿½ï¿½Ãºï¿½ï¿½ï¿½ï¿½ï¿½vision_task.cï¿½ï¿½ï¿½ï¿½Ä¼ï¿½
+  // HAL_UART_Receive_IT(&huart6, uart6_rxbuf,11);
+  //__HAL_UART_ENABLE_IT(&huart1,UART_IT_IDLE);
+  // HAL_UART_Receive_DMA(&huart1,connect_data.true_buf,RXBUFFER_LEN);
 
-void connect_usart1_init(void)
-{
-  //¿ªÆôÊÓ¾õ´®¿ÚµÄ½ÓÊÕÖÐ¶Ï£¬¸Ãº¯ÊýÔÚvision_task.cÕâ¸öÎÄ¼þ
-  //HAL_UART_Receive_IT(&huart6, uart6_rxbuf,11);
-  //__HAL_UART_ENABLE_IT(&huart1,UART_IT_IDLE);  
-	//HAL_UART_Receive_DMA(&huart1,connect_data.true_buf,RXBUFFER_LEN);  
-	
-	  HAL_UARTEx_ReceiveToIdle_DMA(&huart1, rev_data.rx,RECEIVE_DATA_SIZE*2);	
+  HAL_UARTEx_ReceiveToIdle_DMA(&huart1, rev_data.rx, RECEIVE_DATA_SIZE * 2);
 }
 
 /**************************************************************************
 Function: Calculates the check bits of data to be sent/received
-Input   : Count_Number: The first few digits of a check; Mode: 0-Verify the received data, 1-Validate the sent data
-Output  : Check result
-º¯Êý¹¦ÄÜ£º¼ÆËãÒª·¢ËÍ/½ÓÊÕµÄÊý¾ÝÐ£Ñé½á¹û
-Èë¿Ú²ÎÊý£ºCount_Number£ºÐ£ÑéµÄÇ°¼¸Î»Êý£»Mode£º0-¶Ô½ÓÊÕÊý¾Ý½øÐÐÐ£Ñé£¬1-¶Ô·¢ËÍÊý¾Ý½øÐÐÐ£Ñé
-·µ»Ø  Öµ£ºÐ£Ñé½á¹û
+Input   : Count_Number: The first few digits of a check; Mode: 0-Verify the
+received data, 1-Validate the sent data Output  : Check result
+ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ü£ï¿½ï¿½ï¿½ï¿½ï¿½Òªï¿½ï¿½ï¿½ï¿½/ï¿½ï¿½ï¿½Õµï¿½ï¿½ï¿½ï¿½ï¿½Ð£ï¿½ï¿½ï¿½ï¿½
+ï¿½ï¿½Ú²ï¿½ï¿½ï¿½ï¿½ï¿½Count_Numberï¿½ï¿½Ð£ï¿½ï¿½ï¿½Ç°ï¿½ï¿½Î»ï¿½ï¿½ï¿½ï¿½Modeï¿½ï¿½0-ï¿½Ô½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ý½ï¿½ï¿½ï¿½Ð£ï¿½é£¬1-ï¿½Ô·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ý½ï¿½ï¿½ï¿½Ð£ï¿½ï¿½
+ï¿½ï¿½ï¿½ï¿½  Öµï¿½ï¿½Ð£ï¿½ï¿½ï¿½ï¿½
 **************************************************************************/
-uint8_t Check_Sum(uint8_t Count_Number,uint8_t *buffer)
-{
-	uint8_t check_sum=0;
+uint8_t Check_Sum(uint8_t Count_Number, uint8_t *buffer) {
+  uint8_t check_sum = 0;
 
-	//Validate the data to be sent
-	//¶ÔÒª·¢ËÍ»ò½ÓÊÕµÄÊý¾Ý½øÐÐÐ£Ñé
+  // Validate the data to be sent
+  // ï¿½ï¿½Òªï¿½ï¿½ï¿½Í»ï¿½ï¿½ï¿½Õµï¿½ï¿½ï¿½ï¿½Ý½ï¿½ï¿½ï¿½Ð£ï¿½ï¿½
 
-	for(uint8_t k=0;k<Count_Number;k++)
-	{
-	   check_sum=check_sum^buffer[k];
-	}
+  for (uint8_t k = 0; k < Count_Number; k++) {
+    check_sum = check_sum ^ buffer[k];
+  }
 
-	return check_sum;
+  return check_sum;
 }
 
 extern chassis_t chassis_move;
-void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
-{
-	if(huart->Instance==USART1)
-	{
-//		 if(Size== RECEIVE_DATA_SIZE) //Verify the length of the packet //ÑéÖ¤Êý¾Ý°üµÄ³¤¶È
-//		 {   
-//			 if(rev_data.rx[0] == FRAME_HEADER) //Verify the frame tail of the packet //ÑéÖ¤Êý¾Ý°üµÄÖ¡Î²
-//			 {
-//				if(rev_data.rx[22] == FRAME_TAIL) //Verify the frame tail of the packet //ÑéÖ¤Êý¾Ý°üµÄÖ¡Î²
-//				{
-//					//Data exclusionary or bit check calculation, mode 0 is sent data check
-//					//Êý¾ÝÒì»òÎ»Ð£Ñé¼ÆËã£¬Ä£Ê½0ÊÇ·¢ËÍÊý¾ÝÐ£Ñé
-//					if(rev_data.rx[21] ==Check_Sum(21,rev_data.rx))	 
-//				  {	
-//						for(int i=0;i<10;i++)
-//						{
-//						  int16_t temp=0;
-//						  temp=((rev_data.rx[1+2*i]<<8)|rev_data.rx[2+2*i]);
-//						  chassis_move.joint_motor[i].para.tor_set=(float)((temp/1000)+(temp%1000)*0.001f);
-//						}
-//					}
-//					else
-//				  {
-//				  	  memset(rev_data.rx, 0,RECEIVE_DATA_SIZE);
-//				   }
-//				}
-//				else
-//				{
-//				  	memset(rev_data.rx, 0,RECEIVE_DATA_SIZE);
-//				}
-//			 }
-//			 else
-//			 {
-//				  	memset(rev_data.rx, 0,RECEIVE_DATA_SIZE);
-//			 }
-//		 }
-//		 else
-//		 {
-//				  memset(rev_data.rx, 0,RECEIVE_DATA_SIZE);
-//			}
-	  
-	}
+void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size) {
+  if (huart->Instance == USART1) {
+    //		 if(Size== RECEIVE_DATA_SIZE) //Verify the length of the packet
+    ////ï¿½ï¿½Ö¤ï¿½ï¿½ï¿½Ý°ï¿½ï¿½Ä³ï¿½ï¿½ï¿½
+    //		 {
+    //			 if(rev_data.rx[0] == FRAME_HEADER) //Verify the frame
+    //tail of the packet //ï¿½ï¿½Ö¤ï¿½ï¿½ï¿½Ý°ï¿½ï¿½ï¿½Ö¡Î²
+    //			 {
+    //				if(rev_data.rx[22] == FRAME_TAIL) //Verify the
+    //frame tail of the packet //ï¿½ï¿½Ö¤ï¿½ï¿½ï¿½Ý°ï¿½ï¿½ï¿½Ö¡Î²
+    //				{
+    //					//Data exclusionary or bit check
+    //calculation, mode 0 is sent data check
+    //					//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î»Ð£ï¿½ï¿½ï¿½ï¿½ã£¬Ä£Ê½0ï¿½Ç·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð£ï¿½ï¿½
+    //					if(rev_data.rx[21]
+    //==Check_Sum(21,rev_data.rx))
+    //				  {
+    //						for(int i=0;i<10;i++)
+    //						{
+    //						  int16_t temp=0;
+    //						  temp=((rev_data.rx[1+2*i]<<8)|rev_data.rx[2+2*i]);
+    //						  chassis_move.joint_motor[i].para.tor_set=(float)((temp/1000)+(temp%1000)*0.001f);
+    //						}
+    //					}
+    //					else
+    //				  {
+    //				  	  memset(rev_data.rx,
+    //0,RECEIVE_DATA_SIZE);
+    //				   }
+    //				}
+    //				else
+    //				{
+    //				  	memset(rev_data.rx,
+    //0,RECEIVE_DATA_SIZE);
+    //				}
+    //			 }
+    //			 else
+    //			 {
+    //				  	memset(rev_data.rx,
+    //0,RECEIVE_DATA_SIZE);
+    //			 }
+    //		 }
+    //		 else
+    //		 {
+    //				  memset(rev_data.rx, 0,RECEIVE_DATA_SIZE);
+    //			}
+  }
 }
