@@ -26,8 +26,8 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
-#include "chassisL_task.h"
 #include "fdcan1_task.h"
+#include "fdcan2_task.h"
 #include "gpio.h"
 #include "observe_task.h"
 #include "tim.h"
@@ -76,10 +76,10 @@ const osThreadAttr_t OBSERVE_TASK_attributes = {
     .stack_size = 512 * 4,
     .priority = (osPriority_t)osPriorityHigh,
 };
-/* Definitions for CHASSISL_TASK */
-osThreadId_t CHASSISL_TASKHandle;
-const osThreadAttr_t CHASSISL_TASK_attributes = {
-    .name = "CHASSISL_TASK",
+/* Definitions for FDCAN2_TASK */
+osThreadId_t FDCAN2_TASKHandle;
+const osThreadAttr_t FDCAN2_TASK_attributes = {
+    .name = "FDCAN2_TASK",
     .stack_size = 512 * 4,
     .priority = (osPriority_t)osPriorityHigh,
 };
@@ -87,7 +87,7 @@ const osThreadAttr_t CHASSISL_TASK_attributes = {
 osThreadId_t VBUS_CHECK_TASKHandle;
 const osThreadAttr_t VBUS_CHECK_TASK_attributes = {
     .name = "VBUS_CHECK_TASK",
-    .stack_size = 128 * 4,
+    .stack_size = 512 * 4,
     .priority = (osPriority_t)osPriorityNormal,
 };
 
@@ -99,7 +99,7 @@ const osThreadAttr_t VBUS_CHECK_TASK_attributes = {
 void StartDefaultTask(void *argument);
 void fdcan1_task(void *argument);
 void observe_task(void *argument);
-void ChassisL_Task(void *argument);
+void fdcan2_task(void *argument);
 void VBUS_CheckTask(void *argument);
 
 extern void MX_USB_DEVICE_Init(void);
@@ -143,9 +143,8 @@ void MX_FREERTOS_Init(void) {
   OBSERVE_TASKHandle =
       osThreadNew(observe_task, NULL, &OBSERVE_TASK_attributes);
 
-  /* creation of CHASSISL_TASK */
-  CHASSISL_TASKHandle =
-      osThreadNew(ChassisL_Task, NULL, &CHASSISL_TASK_attributes);
+  /* creation of FDCAN2_TASK */
+  FDCAN2_TASKHandle = osThreadNew(fdcan2_task, NULL, &FDCAN2_TASK_attributes);
 
   /* creation of VBUS_CHECK_TASK */
   VBUS_CHECK_TASKHandle =
@@ -210,20 +209,20 @@ void observe_task(void *argument) {
   /* USER CODE END observe_task */
 }
 
-/* USER CODE BEGIN Header_ChassisL_Task */
+/* USER CODE BEGIN Header_fdcan2_task */
 /**
- * @brief Function implementing the CHASSISL_TASK thread.
+ * @brief Function implementing the FDCAN2_TASK thread.
  * @param argument: Not used
  * @retval None
  */
-/* USER CODE END Header_ChassisL_Task */
-void ChassisL_Task(void *argument) {
-  /* USER CODE BEGIN ChassisL_Task */
+/* USER CODE END Header_fdcan2_task */
+void fdcan2_task(void *argument) {
+  /* USER CODE BEGIN fdcan2_task */
   /* Infinite loop */
   for (;;) {
-    ChassisL_task();
+    fdcan2_task_();
   }
-  /* USER CODE END ChassisL_Task */
+  /* USER CODE END fdcan2_task */
 }
 
 /* USER CODE BEGIN Header_VBUS_CheckTask */

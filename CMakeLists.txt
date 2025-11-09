@@ -67,9 +67,9 @@ target_link_directories(${CMAKE_PROJECT_NAME} PRIVATE
 target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user sources here
     User/App/fdcan1_task.c
-    User/App/ChassisL_task.c
-    User/App/vbus_check.c
+    User/App/fdcan2_task.c
     User/App/observe_task.c
+    User/App/vbus_check.c
     User/Devices/DM_Motor/motor_config.c
     User/Bsp/bsp_dwt.c
     User/Bsp/bsp_PWM.c
