@@ -122,11 +122,3 @@ void fdcan1_init(chassis_t *chassis) {
     osDelay(25);
   }
 }
-
-void mySaturate(float *in, float min, float max) {
-  if (*in < min) {
-    *in = min;
-  } else if (*in > max) {
-    *in = max;
-  }
-}

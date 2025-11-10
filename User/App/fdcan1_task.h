@@ -14,6 +14,4 @@ typedef struct {
 extern void fdcan1_init(chassis_t *chassis);
 extern void fdcan1_task_(void);
 
-extern void mySaturate(float *in, float min, float max);
-
 #endif
