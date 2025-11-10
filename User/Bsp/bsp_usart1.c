@@ -9,7 +9,7 @@ send_data_t send_data2;
 rev_data_t rev_data;
 
 void connect_usart1_init(void) {
-  // �����Ӿ����ڵĽ����жϣ��ú�����vision_task.c����ļ�
+  //
   // HAL_UART_Receive_IT(&huart6, uart6_rxbuf,11);
   //__HAL_UART_ENABLE_IT(&huart1,UART_IT_IDLE);
   // HAL_UART_Receive_DMA(&huart1,connect_data.true_buf,RXBUFFER_LEN);
@@ -21,15 +21,11 @@ void connect_usart1_init(void) {
 Function: Calculates the check bits of data to be sent/received
 Input   : Count_Number: The first few digits of a check; Mode: 0-Verify the
 received data, 1-Validate the sent data Output  : Check result
-�������ܣ�����Ҫ����/���յ�����У����
-��ڲ�����Count_Number��У���ǰ��λ����Mode��0-�Խ������ݽ���У�飬1-�Է������ݽ���У��
-����  ֵ��У����
 **************************************************************************/
 uint8_t Check_Sum(uint8_t Count_Number, uint8_t *buffer) {
   uint8_t check_sum = 0;
 
   // Validate the data to be sent
-  // ��Ҫ���ͻ���յ����ݽ���У��
 
   for (uint8_t k = 0; k < Count_Number; k++) {
     check_sum = check_sum ^ buffer[k];
@@ -42,17 +38,17 @@ extern chassis_t chassis_move;
 void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size) {
   if (huart->Instance == USART1) {
     //		 if(Size== RECEIVE_DATA_SIZE) //Verify the length of the packet
-    ////��֤���ݰ��ĳ���
+    //
     //		 {
     //			 if(rev_data.rx[0] == FRAME_HEADER) //Verify the frame
-    //tail of the packet //��֤���ݰ���֡β
+    // tail of the packet
     //			 {
     //				if(rev_data.rx[22] == FRAME_TAIL) //Verify the
-    //frame tail of the packet //��֤���ݰ���֡β
+    // frame tail of the packet
     //				{
     //					//Data exclusionary or bit check
-    //calculation, mode 0 is sent data check
-    //					//�������λУ����㣬ģʽ0�Ƿ�������У��
+    // calculation, mode 0 is sent data check
+    //
     //					if(rev_data.rx[21]
     //==Check_Sum(21,rev_data.rx))
     //				  {
@@ -66,19 +62,19 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size) {
     //					else
     //				  {
     //				  	  memset(rev_data.rx,
-    //0,RECEIVE_DATA_SIZE);
+    // 0,RECEIVE_DATA_SIZE);
     //				   }
     //				}
     //				else
     //				{
     //				  	memset(rev_data.rx,
-    //0,RECEIVE_DATA_SIZE);
+    // 0,RECEIVE_DATA_SIZE);
     //				}
     //			 }
     //			 else
     //			 {
     //				  	memset(rev_data.rx,
-    //0,RECEIVE_DATA_SIZE);
+    // 0,RECEIVE_DATA_SIZE);
     //			 }
     //		 }
     //		 else

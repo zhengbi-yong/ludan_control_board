@@ -177,22 +177,6 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan,
         break;
       }
     }
-    if (hfdcan->Instance == FDCAN3) {
-      /* Retrieve Rx messages from RX FIFO0 */
-      memset(g_Can3RxData, 0, sizeof(g_Can3RxData)); // ����ǰ���������
-      HAL_FDCAN_GetRxMessage(hfdcan, FDCAN_RX_FIFO0, &RxHeader3, g_Can3RxData);
-
-      switch (RxHeader3.Identifier) {
-      case 0x19:
-        // dm6006_fbdata(&robot_body.loin_motor, g_Can3RxData,
-        //               RxHeader3.DataLength);
-        // mybuff3[8]++;
-        break;
-
-      default:
-        break;
-      }
-    }
   }
 }
 int64_t mybuff2[5] = {0};
@@ -203,7 +187,7 @@ void HAL_FDCAN_RxFifo1Callback(FDCAN_HandleTypeDef *hfdcan,
       /* Retrieve Rx messages from RX FIFO0 */
       memset(g_Can2RxData, 0, sizeof(g_Can2RxData));
       HAL_FDCAN_GetRxMessage(hfdcan, FDCAN_RX_FIFO1, &RxHeader2, g_Can2RxData);
-      switch (RxHeader2.Identifier) { // ����
+      switch (RxHeader2.Identifier) {
       case 0x15:
         dm4340_fbdata(&chassis_move.joint_motor[0], g_Can2RxData,
                       RxHeader2.DataLength);
