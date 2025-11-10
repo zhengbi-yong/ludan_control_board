@@ -14,19 +14,13 @@
   */
 
 #include "fdcan2_task.h"
+#include "cmsis_os2.h"
 #include "fdcan.h"
-
-#include "cmsis_os.h"
 
 extern chassis_t chassis_move;
 
 uint32_t CHASSL_TIME = 1;
 
-float my_kd = 0.0f;
-float my_vel = 0.0f;
-float my_kp = 0.0f;
-float my_pos = 0.0f;
-int b = 0;
 void fdcan2_task_(void) {
   chassis_move.start_flag = 1;
   osDelay(500);
@@ -49,29 +43,6 @@ void fdcan2_task_(void) {
       mit_ctrl_test(&hfdcan2, 0x05, &chassis_move.joint_motor[11]);
       mit_ctrl_test(&hfdcan2, 0x06, &chassis_move.joint_motor[12]);
       mit_ctrl_test(&hfdcan2, 0x07, &chassis_move.joint_motor[13]);
-
-    } else {
-      mit_ctrl2(&hfdcan2, 0x01, my_pos, my_vel, my_kp, my_kd,
-                0.0f);                                         // left_pitch
-      mit_ctrl2(&hfdcan2, 0x02, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f); // left_yaw
-      mit_ctrl2(&hfdcan2, 0x03, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f); // left_roll
-      mit_ctrl2(&hfdcan2, 0x04, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f); // left_calf
-      mit_ctrl2(&hfdcan2, 0x05, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f); // left_foot
-      mit_ctrl2(&hfdcan2, 0x06, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f); // left_foot
-      mit_ctrl2(&hfdcan2, 0x07, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f); // left_foot
-    }
-
-    if (b == 1) {
-      // save_motor_zero(&hfdcan2,0x05, MIT_MODE);
-      // osDelay(CHASSL_TIME);
-      save_motor_zero(&hfdcan2, 0x04, MIT_MODE);
-      // osDelay(CHASSL_TIME);
-      // save_motor_zero(&hfdcan2,0x03, MIT_MODE);
-      // osDelay(CHASSL_TIME);
-      // save_motor_zero(&hfdcan2,0x02, MIT_MODE);
-      // osDelay(CHASSL_TIME);
-      // save_motor_zero(&hfdcan2,0x01, MIT_MODE);
-      osDelay(CHASSL_TIME);
     }
     osDelay(CHASSL_TIME);
   }

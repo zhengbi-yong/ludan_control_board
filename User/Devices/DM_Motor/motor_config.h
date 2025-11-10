@@ -128,8 +128,7 @@ typedef struct {
 
 typedef struct {
   uint16_t mode;
-  float wheel_T; // ��챵�������Ť�أ���λΪN
-
+  float wheel_T;
   motor_fbpara_t para;
 } Wheel_Motor_t;
 
