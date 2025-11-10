@@ -43,11 +43,11 @@ void fdcan1_task_(void) {
     if (chassis_move.start_flag == 1) {
       mit_ctrl_test(&hfdcan1, 0x01, &chassis_move.joint_motor[0]);
       mit_ctrl_test(&hfdcan1, 0x02, &chassis_move.joint_motor[1]);
-      mit_ctrl_test(&hfdcan1, 0x0A, &chassis_move.joint_motor[2]);
-      mit_ctrl_test(&hfdcan1, 0x05, &chassis_move.joint_motor[3]);
-      mit_ctrl_test(&hfdcan1, 0x07, &chassis_move.joint_motor[4]);
-      mit_ctrl_test(&hfdcan1, 0x08, &chassis_move.joint_motor[5]);
-      mit_ctrl_test(&hfdcan1, 0x09, &chassis_move.joint_motor[6]);
+      mit_ctrl_test(&hfdcan1, 0x03, &chassis_move.joint_motor[2]);
+      mit_ctrl_test(&hfdcan1, 0x04, &chassis_move.joint_motor[3]);
+      mit_ctrl_test(&hfdcan1, 0x05, &chassis_move.joint_motor[4]);
+      mit_ctrl_test(&hfdcan1, 0x06, &chassis_move.joint_motor[5]);
+      mit_ctrl_test(&hfdcan1, 0x07, &chassis_move.joint_motor[6]);
     } else { // void mit_ctrl(hcan_t* hcan, uint16_t motor_id, float pos, float
              // vel,float kp, float kd, float torq)
       mit_ctrl2(&hfdcan1, 0x01, 0.0f, 0.0f, 0.0f, 0.0f, my_tor2); // right_pitch
@@ -79,12 +79,12 @@ void fdcan1_task_(void) {
 
 void fdcan1_init(chassis_t *chassis) {
   joint_motor_init(&chassis->joint_motor[0], 1, MIT_MODE);
-  joint_motor_init(&chassis->joint_motor[1], 0x2, MIT_MODE);
-  joint_motor_init(&chassis->joint_motor[2], 0xA, MIT_MODE);
-  joint_motor_init(&chassis->joint_motor[3], 5, MIT_MODE);
-  joint_motor_init(&chassis->joint_motor[4], 7, MIT_MODE);
-  joint_motor_init(&chassis->joint_motor[5], 8, MIT_MODE);
-  joint_motor_init(&chassis->joint_motor[6], 9, MIT_MODE);
+  joint_motor_init(&chassis->joint_motor[1], 2, MIT_MODE);
+  joint_motor_init(&chassis->joint_motor[2], 3, MIT_MODE);
+  joint_motor_init(&chassis->joint_motor[3], 4, MIT_MODE);
+  joint_motor_init(&chassis->joint_motor[4], 5, MIT_MODE);
+  joint_motor_init(&chassis->joint_motor[5], 6, MIT_MODE);
+  joint_motor_init(&chassis->joint_motor[6], 7, MIT_MODE);
   for (int j = 0; j < 10; j++) {
     enable_motor_mode(&hfdcan1, chassis->joint_motor[0].para.id,
                       chassis->joint_motor[0].mode);

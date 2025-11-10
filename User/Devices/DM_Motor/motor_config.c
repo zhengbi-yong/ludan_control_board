@@ -41,8 +41,8 @@ int float_to_uint(float x_float, float x_min, float x_max, int bits) {
 * @param[in]:   x_max: ��Χ���ֵ
 * @param[in]:   bits:  �޷���������λ��
 * @retval:     	���������
-* @details:    	���������޷������� x_int ��ָ����Χ [x_min, x_max]
-*�ڽ�������ӳ�䣬ӳ����Ϊһ��������
+* @details:    	���������޷������� x_int ��ָ����Χ [x_min,
+*x_max] �ڽ�������ӳ�䣬ӳ����Ϊһ��������
 ************************************************************************
 **/
 float uint_to_float(int x_int, float x_min, float x_max, int bits) {
@@ -92,7 +92,7 @@ void dm4310_fbdata(Joint_Motor_t *motor, uint8_t *rx_data, uint32_t data_len) {
 }
 
 void dm4340_fbdata(Joint_Motor_t *motor, uint8_t *rx_data, uint32_t data_len) {
-  if (data_len == FDCAN_DLC_BYTES_8) { // ���ص�������8���ֽ�
+  if (data_len == FDCAN_DLC_BYTES_8) {
     motor->para.id = (rx_data[0]) & 0x0F;
     motor->para.state = (rx_data[0]) >> 4;
     motor->para.p_int = (rx_data[1] << 8) | rx_data[2];

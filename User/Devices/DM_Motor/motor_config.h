@@ -95,7 +95,6 @@
 typedef struct {
   uint16_t id;
   uint16_t state;
-  // ���ʵ�ʷ���������
   int p_int;
   int v_int;
   int t_int;
@@ -114,7 +113,7 @@ typedef struct {
   float tor_set;
   float pos_set;
   float vel_set;
-  // ��λ��������
+
   int kp_int_test;
   int kd_int_test;
   int p_int_test;
