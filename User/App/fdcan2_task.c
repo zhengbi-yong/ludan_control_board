@@ -32,23 +32,23 @@ void fdcan2_task_(void) {
   osDelay(500);
   fdcan2_init(&chassis_move);
 
-  dm6248p_fbdata_init(&chassis_move.joint_motor[0]);
-  dm6248p_fbdata_init(&chassis_move.joint_motor[1]);
-  dm6248p_fbdata_init(&chassis_move.joint_motor[2]);
-  dm4340_fbdata_init(&chassis_move.joint_motor[3]);
-  dm4340_fbdata_init(&chassis_move.joint_motor[4]);
-  dm4340_fbdata_init(&chassis_move.joint_motor[5]);
-  dm4340_fbdata_init(&chassis_move.joint_motor[6]);
+  dm6248p_fbdata_init(&chassis_move.joint_motor[7]);
+  dm6248p_fbdata_init(&chassis_move.joint_motor[8]);
+  dm6248p_fbdata_init(&chassis_move.joint_motor[9]);
+  dm4340_fbdata_init(&chassis_move.joint_motor[10]);
+  dm4340_fbdata_init(&chassis_move.joint_motor[11]);
+  dm4340_fbdata_init(&chassis_move.joint_motor[12]);
+  dm4340_fbdata_init(&chassis_move.joint_motor[13]);
 
   while (1) {
     if (chassis_move.start_flag == 1) {
-      mit_ctrl_test(&hfdcan2, 0x01, &chassis_move.joint_motor[0]);
-      mit_ctrl_test(&hfdcan2, 0x02, &chassis_move.joint_motor[1]);
-      mit_ctrl_test(&hfdcan2, 0x03, &chassis_move.joint_motor[2]);
-      mit_ctrl_test(&hfdcan2, 0x04, &chassis_move.joint_motor[3]);
-      mit_ctrl_test(&hfdcan2, 0x05, &chassis_move.joint_motor[4]);
-      mit_ctrl_test(&hfdcan2, 0x06, &chassis_move.joint_motor[5]);
-      mit_ctrl_test(&hfdcan2, 0x07, &chassis_move.joint_motor[6]);
+      mit_ctrl_test(&hfdcan2, 0x01, &chassis_move.joint_motor[7]);
+      mit_ctrl_test(&hfdcan2, 0x02, &chassis_move.joint_motor[8]);
+      mit_ctrl_test(&hfdcan2, 0x03, &chassis_move.joint_motor[9]);
+      mit_ctrl_test(&hfdcan2, 0x04, &chassis_move.joint_motor[10]);
+      mit_ctrl_test(&hfdcan2, 0x05, &chassis_move.joint_motor[11]);
+      mit_ctrl_test(&hfdcan2, 0x06, &chassis_move.joint_motor[12]);
+      mit_ctrl_test(&hfdcan2, 0x07, &chassis_move.joint_motor[13]);
 
     } else {
       mit_ctrl2(&hfdcan2, 0x01, my_pos, my_vel, my_kp, my_kd,
@@ -78,47 +78,47 @@ void fdcan2_task_(void) {
 }
 
 void fdcan2_init(chassis_t *chassis) {
-  joint_motor_init(&chassis->joint_motor[0], 1, MIT_MODE);
-  joint_motor_init(&chassis->joint_motor[1], 2, MIT_MODE);
-  joint_motor_init(&chassis->joint_motor[2], 3, MIT_MODE);
-  joint_motor_init(&chassis->joint_motor[3], 4, MIT_MODE);
-  joint_motor_init(&chassis->joint_motor[4], 5, MIT_MODE);
-  joint_motor_init(&chassis->joint_motor[5], 6, MIT_MODE);
-  joint_motor_init(&chassis->joint_motor[6], 7, MIT_MODE);
+  joint_motor_init(&chassis->joint_motor[7], 1, MIT_MODE);
+  joint_motor_init(&chassis->joint_motor[8], 2, MIT_MODE);
+  joint_motor_init(&chassis->joint_motor[9], 3, MIT_MODE);
+  joint_motor_init(&chassis->joint_motor[10], 4, MIT_MODE);
+  joint_motor_init(&chassis->joint_motor[11], 5, MIT_MODE);
+  joint_motor_init(&chassis->joint_motor[12], 6, MIT_MODE);
+  joint_motor_init(&chassis->joint_motor[13], 7, MIT_MODE);
 
   for (int j = 0; j < 10; j++) {
     enable_motor_mode(&hfdcan2, chassis->joint_motor[0].para.id,
-                      chassis->joint_motor[0].mode);
+                      chassis->joint_motor[7].mode);
     osDelay(20);
   }
   for (int j = 0; j < 10; j++) {
     enable_motor_mode(&hfdcan2, chassis->joint_motor[1].para.id,
-                      chassis->joint_motor[1].mode);
+                      chassis->joint_motor[8].mode);
     osDelay(20);
   }
   for (int j = 0; j < 10; j++) {
     enable_motor_mode(&hfdcan2, chassis->joint_motor[2].para.id,
-                      chassis->joint_motor[2].mode);
+                      chassis->joint_motor[9].mode);
     osDelay(20);
   }
   for (int j = 0; j < 10; j++) {
     enable_motor_mode(&hfdcan2, chassis->joint_motor[3].para.id,
-                      chassis->joint_motor[3].mode);
+                      chassis->joint_motor[10].mode);
     osDelay(20);
   }
   for (int j = 0; j < 10; j++) {
     enable_motor_mode(&hfdcan2, chassis->joint_motor[4].para.id,
-                      chassis->joint_motor[4].mode);
+                      chassis->joint_motor[11].mode);
     osDelay(20);
   }
   for (int j = 0; j < 10; j++) {
     enable_motor_mode(&hfdcan2, chassis->joint_motor[5].para.id,
-                      chassis->joint_motor[5].mode);
+                      chassis->joint_motor[12].mode);
     osDelay(20);
   }
   for (int j = 0; j < 10; j++) {
     enable_motor_mode(&hfdcan2, chassis->joint_motor[6].para.id,
-                      chassis->joint_motor[6].mode);
+                      chassis->joint_motor[13].mode);
     osDelay(20);
   }
 }
