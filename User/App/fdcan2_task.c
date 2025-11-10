@@ -29,7 +29,7 @@ float my_pos = 0.0f;
 int b = 0;
 void fdcan2_task_(void) {
   chassis_move.start_flag = 1;
-  osDelay(2000);
+  osDelay(500);
   fdcan2_init(&chassis_move);
 
   dm6248p_fbdata_init(&chassis_move.joint_motor[0]);

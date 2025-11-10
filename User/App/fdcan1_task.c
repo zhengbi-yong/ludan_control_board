@@ -20,7 +20,6 @@
 chassis_t chassis_move;
 
 uint32_t CHASSR_TIME = 1;
-
 float my_kd2 = 0.0f;
 float my_vel2 = 0.0f;
 float my_kp2 = 0.0f;
@@ -29,7 +28,7 @@ float my_tor2 = 0.0f;
 int a = 0;
 void fdcan1_task_(void) {
   chassis_move.start_flag = 1;
-  osDelay(2000);
+  osDelay(500);
   fdcan1_init(&chassis_move);
 
   dm6248p_fbdata_init(&chassis_move.joint_motor[7]);
@@ -89,38 +88,38 @@ void fdcan1_init(chassis_t *chassis) {
   for (int j = 0; j < 10; j++) {
     enable_motor_mode(&hfdcan1, chassis->joint_motor[7].para.id,
                       chassis->joint_motor[7].mode);
-    osDelay(100);
+    osDelay(25);
   }
   for (int j = 0; j < 10; j++) {
     enable_motor_mode(&hfdcan1, chassis->joint_motor[8].para.id,
                       chassis->joint_motor[8].mode);
-    osDelay(100);
+    osDelay(25);
   }
   for (int j = 0; j < 10; j++) {
     enable_motor_mode(&hfdcan1, chassis->joint_motor[9].para.id,
                       chassis->joint_motor[9].mode);
-    osDelay(100);
+    osDelay(25);
   }
 
   for (int j = 0; j < 10; j++) {
     enable_motor_mode(&hfdcan1, chassis->joint_motor[10].para.id,
                       chassis->joint_motor[10].mode);
-    osDelay(100);
+    osDelay(25);
   }
   for (int j = 0; j < 10; j++) {
     enable_motor_mode(&hfdcan1, chassis->joint_motor[11].para.id,
                       chassis->joint_motor[11].mode);
-    osDelay(100);
+    osDelay(25);
   }
   for (int j = 0; j < 10; j++) {
     enable_motor_mode(&hfdcan1, chassis->joint_motor[12].para.id,
                       chassis->joint_motor[12].mode);
-    osDelay(100);
+    osDelay(25);
   }
   for (int j = 0; j < 10; j++) {
     enable_motor_mode(&hfdcan1, chassis->joint_motor[13].para.id,
                       chassis->joint_motor[13].mode);
-    osDelay(100);
+    osDelay(25);
   }
 }
 
