@@ -271,7 +271,6 @@ static int8_t CDC_Receive_HS(uint8_t* Buf, uint32_t *Len)
   {
     // num1++;
     memcpy(rev_data.rx, Buf, *Len);
-
     if (rev_data.rx[0] == FRAME_HEADER) // Verify the frame tail of the packet
     {
       // Data exclusionary or bit check calculation, mode 0 is sent data check
