@@ -1,29 +1,21 @@
 #include "motor_config.h"
-
 #include "arm_math.h"
 #include "fdcan.h"
 
-float Hex_To_Float(uint32_t *Byte, int num) // ʮ�����Ƶ�������
-{
-  return *((float *)Byte);
-}
+float Hex_To_Float(uint32_t *Byte, int num) { return *((float *)Byte); }
 
-uint32_t FloatTohex(float HEX) // ��������ʮ������ת��
-{
-  return *(uint32_t *)&HEX;
-}
+uint32_t FloatTohex(float HEX) { return *(uint32_t *)&HEX; }
 
 /**
 ************************************************************************
 * @brief:      	float_to_uint:
-*������ת��Ϊ�޷�����������
-* @param[in]:   x_float:	��ת���ĸ�����
-* @param[in]:   x_min:		��Χ��Сֵ
-* @param[in]:   x_max:		��Χ���ֵ
-* @param[in]:   bits: 		Ŀ���޷���������λ��
-* @retval:     	�޷����������
-* @details:    	�������ĸ����� x ��ָ����Χ [x_min, x_max]
-*�ڽ�������ӳ�䣬ӳ����Ϊһ��ָ��λ�����޷�������
+*
+* @param[in]:   x_float:
+* @param[in]:   x_min:
+* @param[in]:   x_max:
+* @param[in]:   bits:
+* @retval:
+* @details:
 ************************************************************************
 **/
 int float_to_uint(float x_float, float x_min, float x_max, int bits) {
@@ -35,14 +27,13 @@ int float_to_uint(float x_float, float x_min, float x_max, int bits) {
 /**
 ************************************************************************
 * @brief:      	uint_to_float:
-*�޷�������ת��Ϊ����������
-* @param[in]:   x_int: ��ת�����޷�������
-* @param[in]:   x_min: ��Χ��Сֵ
-* @param[in]:   x_max: ��Χ���ֵ
-* @param[in]:   bits:  �޷���������λ��
-* @retval:     	���������
-* @details:    	���������޷������� x_int ��ָ����Χ [x_min,
-*x_max] �ڽ�������ӳ�䣬ӳ����Ϊһ��������
+*
+* @param[in]:   x_int:
+* @param[in]:   x_min:
+* @param[in]:   x_max:
+* @param[in]:   bits:
+* @retval:
+* @details:
 ************************************************************************
 **/
 float uint_to_float(int x_int, float x_min, float x_max, int bits) {
@@ -64,17 +55,16 @@ void wheel_motor_init(Wheel_Motor_t *motor, uint16_t id, uint16_t mode) {
 
 /**
 ************************************************************************
-* @brief:      	dm4310_fbdata: ��ȡDM4310����������ݺ���
-* @param[in]:   motor:    ָ��motor_t�ṹ��ָ�룬������������Ϣ�ͷ�������
-* @param[in]:   rx_data:  ָ������������ݵ�����ָ��
-* @param[in]:   data_len: ���ݳ���
+* @brief:      	dm4310_fbdata:
+* @param[in]:   motor:
+* @param[in]:   rx_data:
+* @param[in]:   data_len:
 * @retval:     	void
-* @details:    	�ӽ��յ�����������ȡDM4310����ķ�����Ϣ���������ID��
-*               ״̬��λ�á��ٶȡ�Ť������¶Ȳ������Ĵ������ݵ�
+* @details:
 ************************************************************************
 **/
 void dm4310_fbdata(Joint_Motor_t *motor, uint8_t *rx_data, uint32_t data_len) {
-  if (data_len == FDCAN_DLC_BYTES_8) { // ���ص�������8���ֽ�
+  if (data_len == FDCAN_DLC_BYTES_8) {
     motor->para.id = (rx_data[0]) & 0x0F;
     motor->para.state = (rx_data[0]) >> 4;
     motor->para.p_int = (rx_data[1] << 8) | rx_data[2];
@@ -107,7 +97,7 @@ void dm4340_fbdata(Joint_Motor_t *motor, uint8_t *rx_data, uint32_t data_len) {
 }
 
 void dm6006_fbdata(Joint_Motor_t *motor, uint8_t *rx_data, uint32_t data_len) {
-  if (data_len == FDCAN_DLC_BYTES_8) { // ���ص�������8���ֽ�
+  if (data_len == FDCAN_DLC_BYTES_8) {
     motor->para.id = (rx_data[0]) & 0x0F;
     motor->para.state = (rx_data[0]) >> 4;
     motor->para.p_int = (rx_data[1] << 8) | rx_data[2];
@@ -122,7 +112,7 @@ void dm6006_fbdata(Joint_Motor_t *motor, uint8_t *rx_data, uint32_t data_len) {
 }
 
 void dm8006_fbdata(Joint_Motor_t *motor, uint8_t *rx_data, uint32_t data_len) {
-  if (data_len == FDCAN_DLC_BYTES_8) { // ���ص�������8���ֽ�
+  if (data_len == FDCAN_DLC_BYTES_8) {
     motor->para.id = (rx_data[0]) & 0x0F;
     motor->para.state = (rx_data[0]) >> 4;
     motor->para.p_int = (rx_data[1] << 8) | rx_data[2];
@@ -137,7 +127,7 @@ void dm8006_fbdata(Joint_Motor_t *motor, uint8_t *rx_data, uint32_t data_len) {
 }
 
 void dm3507_fbdata(Joint_Motor_t *motor, uint8_t *rx_data, uint32_t data_len) {
-  if (data_len == FDCAN_DLC_BYTES_8) { // ���ص�������8���ֽ�
+  if (data_len == FDCAN_DLC_BYTES_8) {
     motor->para.id = (rx_data[0]) & 0x0F;
     motor->para.state = (rx_data[0]) >> 4;
     motor->para.p_int = (rx_data[1] << 8) | rx_data[2];
@@ -153,7 +143,7 @@ void dm3507_fbdata(Joint_Motor_t *motor, uint8_t *rx_data, uint32_t data_len) {
 
 void dm10010l_fbdata(Joint_Motor_t *motor, uint8_t *rx_data,
                      uint32_t data_len) {
-  if (data_len == FDCAN_DLC_BYTES_8) { // ���ص�������8���ֽ�
+  if (data_len == FDCAN_DLC_BYTES_8) {
     motor->para.id = (rx_data[0]) & 0x0F;
     motor->para.state = (rx_data[0]) >> 4;
     motor->para.p_int = (rx_data[1] << 8) | rx_data[2];
@@ -168,7 +158,7 @@ void dm10010l_fbdata(Joint_Motor_t *motor, uint8_t *rx_data,
 }
 
 void dm6248p_fbdata(Joint_Motor_t *motor, uint8_t *rx_data, uint32_t data_len) {
-  if (data_len == FDCAN_DLC_BYTES_8) { // ���ص�������8���ֽ�
+  if (data_len == FDCAN_DLC_BYTES_8) {
     motor->para.id = (rx_data[0]) & 0x0F;
     motor->para.state = (rx_data[0]) >> 4;
     motor->para.p_int = (rx_data[1] << 8) | rx_data[2];
@@ -182,7 +172,6 @@ void dm6248p_fbdata(Joint_Motor_t *motor, uint8_t *rx_data, uint32_t data_len) {
   }
 }
 
-// ���ǲ�����λ��������Ƭ��������
 void dm4310_fbdata_test(Joint_Motor_t *motor, uint8_t *rx_data) {
   motor->para.p_int_test = (rx_data[2] << 8) | rx_data[3];
 
@@ -367,12 +356,12 @@ void save_motor_zero(hcan_t *hcan, uint16_t motor_id, uint16_t mode_id) {
 
 /**
 ************************************************************************
-* @brief:      	disable_motor_mode: ���õ��ģʽ����
-* @param[in]:   hcan:     ָ��CAN_HandleTypeDef�ṹ��ָ��
-* @param[in]:   motor_id: ���ID��ָ��Ŀ����
-* @param[in]:   mode_id:  ģʽID��ָ��Ҫ���õ�ģʽ
+* @brief:      	disable_motor_mode:
+* @param[in]:   hcan:
+* @param[in]:   motor_id:
+* @param[in]:   mode_id:
 * @retval:     	void
-* @details:    	ͨ��CAN�������ض�������ͽ����ض�ģʽ������
+* @details:
 ************************************************************************
 **/
 void disable_motor_mode(hcan_t *hcan, uint16_t motor_id, uint16_t mode_id) {
@@ -393,16 +382,16 @@ void disable_motor_mode(hcan_t *hcan, uint16_t motor_id, uint16_t mode_id) {
 
 /**
 ************************************************************************
-* @brief:      	mit_ctrl: MITģʽ�µĵ�����ƺ���
-* @param[in]:   hcan:			ָ��CAN_HandleTypeDef�ṹ��ָ�룬����ָ��CAN����
-* @param[in]:   motor_id:	���ID��ָ��Ŀ����
-* @param[in]:   pos:			λ�ø���ֵ
-* @param[in]:   vel:			�ٶȸ���ֵ
-* @param[in]:   kp:				λ�ñ���ϵ��
-* @param[in]:   kd:				λ��΢��ϵ��
-* @param[in]:   torq:			ת�ظ���ֵ
+* @brief:      	mit_ctrl:
+* @param[in]:   hcan:
+* @param[in]:   motor_id:
+* @param[in]:   pos:
+* @param[in]:   vel:
+* @param[in]:   kp:
+* @param[in]:   kd:
+* @param[in]:   torq:
 * @retval:     	void
-* @details:    	ͨ��CAN������������MITģʽ�µĿ���֡��
+* @details:
 ************************************************************************
 **/
 void mit_ctrl(hcan_t *hcan, uint16_t motor_id, float pos, float vel, float kp,
@@ -430,12 +419,12 @@ void mit_ctrl(hcan_t *hcan, uint16_t motor_id, float pos, float vel, float kp,
 }
 /**
 ************************************************************************
-* @brief:      	pos_speed_ctrl: λ���ٶȿ��ƺ���
-* @param[in]:   hcan:			ָ��CAN_HandleTypeDef�ṹ��ָ�룬����ָ��CAN����
-* @param[in]:   motor_id:	���ID��ָ��Ŀ����
-* @param[in]:   vel:			�ٶȸ���ֵ
+* @brief:      	pos_speed_ctrl:
+* @param[in]:   hcan:
+* @param[in]:   motor_id:
+* @param[in]:   vel:
 * @retval:     	void
-* @details:    	ͨ��CAN������������λ���ٶȿ�������
+* @details:
 ************************************************************************
 **/
 void pos_speed_ctrl(hcan_t *hcan, uint16_t motor_id, float pos, float vel) {
@@ -461,12 +450,12 @@ void pos_speed_ctrl(hcan_t *hcan, uint16_t motor_id, float pos, float vel) {
 }
 /**
 ************************************************************************
-* @brief:      	speed_ctrl: �ٶȿ��ƺ���
-* @param[in]:   hcan: 		ָ��CAN_HandleTypeDef�ṹ��ָ�룬����ָ��CAN����
-* @param[in]:   motor_id: ���ID��ָ��Ŀ����
-* @param[in]:   vel: 			�ٶȸ���ֵ
+* @brief:      	speed_ctrl:
+* @param[in]:   hcan:
+* @param[in]:   motor_id:
+* @param[in]:   vel:
 * @retval:     	void
-* @details:    	ͨ��CAN�������������ٶȿ�������
+* @details:
 ************************************************************************
 **/
 void speed_ctrl(hcan_t *hcan, uint16_t motor_id, float vel) {
@@ -608,7 +597,6 @@ void mit_ctrl_test(hcan_t *hcan, uint16_t motor_id, Joint_Motor_t *motor) {
   canx_send_data(hcan, id, data, 8);
 }
 
-// һ��ʼ��ʼ������Ȼ��ֵ��Ϊ0
 void dm4310_fbdata_init(Joint_Motor_t *motor) {
   motor->para.p_int_test = float_to_uint(0.0f, P_MIN1, P_MAX1, 16);
   motor->para.v_int_test = float_to_uint(0.0f, V_MIN1, V_MAX1, 12);

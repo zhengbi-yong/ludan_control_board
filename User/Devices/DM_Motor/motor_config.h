@@ -56,7 +56,6 @@
 #define T_MIN4 -20.0f
 #define T_MAX4 20.0f
 
-// С�ؽ�3507
 #define P_MIN5 -12.5f
 #define P_MAX5 12.5f
 #define V_MIN5 -50.0f
@@ -175,8 +174,8 @@ extern void mit_ctrl5(hcan_t *hcan, uint16_t motor_id, float pos, float vel,
 extern void joint_motor_init(Joint_Motor_t *motor, uint16_t id, uint16_t mode);
 extern void wheel_motor_init(Wheel_Motor_t *motor, uint16_t id, uint16_t mode);
 
-extern float Hex_To_Float(uint32_t *Byte, int num); // ʮ�����Ƶ�������
-extern uint32_t FloatTohex(float HEX);              // ��������ʮ������ת��
+extern float Hex_To_Float(uint32_t *Byte, int num);
+extern uint32_t FloatTohex(float HEX);
 
 extern float uint_to_float(int x_int, float x_min, float x_max, int bits);
 extern int float_to_uint(float x_float, float x_min, float x_max, int bits);
