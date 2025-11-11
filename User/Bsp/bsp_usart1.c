@@ -34,7 +34,7 @@ uint8_t Check_Sum(uint8_t Count_Number, uint8_t *buffer) {
   return check_sum;
 }
 
-extern chassis_t chassis_move;
+// extern chassis_t chassis_move;
 void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size) {
   if (huart->Instance == USART1) {
     //		 if(Size== RECEIVE_DATA_SIZE) //Verify the length of the packet

@@ -24,7 +24,7 @@
 /* USER CODE BEGIN INCLUDE */
 #include "bsp_usart1.h"
 #include "fdcan1_task.h"
-
+#include "fdcan_bus.h"
 /* USER CODE END INCLUDE */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -33,7 +33,8 @@
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
-extern chassis_t chassis_move;
+extern fdcan_bus_t fdcan1_bus;
+extern fdcan_bus_t fdcan2_bus;
 extern rev_data_t rev_data;
 /* USER CODE END PV */
 
@@ -275,36 +276,12 @@ static int8_t CDC_Receive_HS(uint8_t* Buf, uint32_t *Len)
     {
       // Data exclusionary or bit check calculation, mode 0 is sent data check
       if (rev_data.rx[10] == Check_Sum(10, rev_data.rx)) {
-        if (rev_data.rx[1] == 0) { // 4340
-          dm4340_fbdata_test(&chassis_move.joint_motor[0], rev_data.rx);
-        } else if (rev_data.rx[1] == 1) {
-          dm4340_fbdata_test(&chassis_move.joint_motor[1], rev_data.rx);
-        } else if (rev_data.rx[1] == 2) {
-          dm4340_fbdata_test(&chassis_move.joint_motor[2], rev_data.rx);
-        } else if (rev_data.rx[1] == 3) {
-          dm4340_fbdata_test(&chassis_move.joint_motor[3], rev_data.rx);
-        } else if (rev_data.rx[1] == 4) {
-          dm4340_fbdata_test(&chassis_move.joint_motor[4], rev_data.rx);
-        } else if (rev_data.rx[1] == 5) { // 4340
-          dm4340_fbdata_test(&chassis_move.joint_motor[5], rev_data.rx);
-        } else if (rev_data.rx[1] == 6) {
-          dm4340_fbdata_test(&chassis_move.joint_motor[6], rev_data.rx);
-        } else if (rev_data.rx[1] == 7) {
-          dm4340_fbdata_test(&chassis_move.joint_motor[7], rev_data.rx);
-        } else if (rev_data.rx[1] == 8) {
-          dm4340_fbdata_test(&chassis_move.joint_motor[8], rev_data.rx);
-        } else if (rev_data.rx[1] == 9) { // num2++;
-          dm4340_fbdata_test(&chassis_move.joint_motor[9], rev_data.rx);
-        } else if (rev_data.rx[1] == 10) { // num2++;
-          dm4340_fbdata_test(&chassis_move.joint_motor[10], rev_data.rx);
-        } else if (rev_data.rx[1] == 11) { // num2++;
-          dm4340_fbdata_test(&chassis_move.joint_motor[11], rev_data.rx);
-        } else if (rev_data.rx[1] == 12) { // num2++;
-          dm4340_fbdata_test(&chassis_move.joint_motor[12], rev_data.rx);
-        } else if (rev_data.rx[1] == 13) { // num2++;
-          dm4340_fbdata_test(&chassis_move.joint_motor[13], rev_data.rx);
+        uint8_t id = rev_data.rx[1];
+        if (id < 7) {
+          dm4340_fbdata_test(&fdcan1_bus.motor[id], rev_data.rx);
+        } else {
+          dm4340_fbdata_test(&fdcan2_bus.motor[id - 7], rev_data.rx);
         }
-
       } else {
         memset(rev_data.rx, 0, RECEIVE_DATA_SIZE);
       }

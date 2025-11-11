@@ -1,0 +1,18 @@
+#include "fdcan_bus.h"
+
+// 声明外部FDCAN句柄
+extern FDCAN_HandleTypeDef hfdcan1;
+extern FDCAN_HandleTypeDef hfdcan2;
+
+// 定义两条总线的全局对象
+fdcan_bus_t fdcan1_bus = {
+    .hfdcan = &hfdcan1,
+    .motor_count = 7,
+    .start_flag = 0,
+};
+
+fdcan_bus_t fdcan2_bus = {
+    .hfdcan = &hfdcan2,
+    .motor_count = 7,
+    .start_flag = 0,
+};

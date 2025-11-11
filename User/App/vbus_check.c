@@ -20,9 +20,10 @@
 #include "cmsis_os.h"
 #include "fdcan.h"
 #include "fdcan1_task.h"
+#include "fdcan_bus.h"
 #include "tim.h"
-extern chassis_t chassis_move;
-// extern body_t robot_body;
+extern fdcan_bus_t fdcan1_bus;
+extern fdcan_bus_t fdcan2_bus;
 
 static uint16_t adc_val[2];
 static float vbus;
@@ -54,37 +55,37 @@ void VBUS_Check_task(void) {
       Power_OUT1_OFF();
 
       for (int j = 0; j < 7; j++) {
-        disable_motor_mode(&hfdcan1, chassis_move.joint_motor[7].para.id,
-                           chassis_move.joint_motor[7].mode);
-        disable_motor_mode(&hfdcan1, chassis_move.joint_motor[8].para.id,
-                           chassis_move.joint_motor[8].mode);
-        disable_motor_mode(&hfdcan1, chassis_move.joint_motor[9].para.id,
-                           chassis_move.joint_motor[9].mode);
-        disable_motor_mode(&hfdcan1, chassis_move.joint_motor[10].para.id,
-                           chassis_move.joint_motor[10].mode);
-        disable_motor_mode(&hfdcan1, chassis_move.joint_motor[11].para.id,
-                           chassis_move.joint_motor[11].mode);
-        disable_motor_mode(&hfdcan1, chassis_move.joint_motor[12].para.id,
-                           chassis_move.joint_motor[12].mode);
-        disable_motor_mode(&hfdcan1, chassis_move.joint_motor[13].para.id,
-                           chassis_move.joint_motor[13].mode);
+        disable_motor_mode(&hfdcan1, fdcan1_bus.motor[0].para.id,
+                           fdcan1_bus.motor[0].mode);
+        disable_motor_mode(&hfdcan1, fdcan1_bus.motor[1].para.id,
+                           fdcan1_bus.motor[1].mode);
+        disable_motor_mode(&hfdcan1, fdcan1_bus.motor[2].para.id,
+                           fdcan1_bus.motor[2].mode);
+        disable_motor_mode(&hfdcan1, fdcan1_bus.motor[3].para.id,
+                           fdcan1_bus.motor[3].mode);
+        disable_motor_mode(&hfdcan1, fdcan1_bus.motor[4].para.id,
+                           fdcan1_bus.motor[4].mode);
+        disable_motor_mode(&hfdcan1, fdcan1_bus.motor[5].para.id,
+                           fdcan1_bus.motor[5].mode);
+        disable_motor_mode(&hfdcan1, fdcan1_bus.motor[6].para.id,
+                           fdcan1_bus.motor[6].mode);
         osDelay(5);
       }
       for (int j = 0; j < 7; j++) {
-        disable_motor_mode(&hfdcan2, chassis_move.joint_motor[0].para.id,
-                           chassis_move.joint_motor[0].mode);
-        disable_motor_mode(&hfdcan2, chassis_move.joint_motor[1].para.id,
-                           chassis_move.joint_motor[1].mode);
-        disable_motor_mode(&hfdcan2, chassis_move.joint_motor[2].para.id,
-                           chassis_move.joint_motor[2].mode);
-        disable_motor_mode(&hfdcan2, chassis_move.joint_motor[3].para.id,
-                           chassis_move.joint_motor[3].mode);
-        disable_motor_mode(&hfdcan2, chassis_move.joint_motor[4].para.id,
-                           chassis_move.joint_motor[4].mode);
-        disable_motor_mode(&hfdcan2, chassis_move.joint_motor[5].para.id,
-                           chassis_move.joint_motor[5].mode);
-        disable_motor_mode(&hfdcan2, chassis_move.joint_motor[6].para.id,
-                           chassis_move.joint_motor[6].mode);
+        disable_motor_mode(&hfdcan2, fdcan2_bus.motor[0].para.id,
+                           fdcan2_bus.motor[0].mode);
+        disable_motor_mode(&hfdcan2, fdcan2_bus.motor[1].para.id,
+                           fdcan2_bus.motor[1].mode);
+        disable_motor_mode(&hfdcan2, fdcan2_bus.motor[2].para.id,
+                           fdcan2_bus.motor[2].mode);
+        disable_motor_mode(&hfdcan2, fdcan2_bus.motor[3].para.id,
+                           fdcan2_bus.motor[3].mode);
+        disable_motor_mode(&hfdcan2, fdcan2_bus.motor[4].para.id,
+                           fdcan2_bus.motor[4].mode);
+        disable_motor_mode(&hfdcan2, fdcan2_bus.motor[5].para.id,
+                           fdcan2_bus.motor[5].mode);
+        disable_motor_mode(&hfdcan2, fdcan2_bus.motor[6].para.id,
+                           fdcan2_bus.motor[6].mode);
         osDelay(5);
       }
       for (int j = 0; j < 7; j++) {
