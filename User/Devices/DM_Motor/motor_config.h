@@ -94,16 +94,19 @@
 typedef struct {
   uint16_t id;
   uint16_t state;
+  uint16_t enabled;
   int p_int;
   int v_int;
   int t_int;
   int kp_int;
   int kd_int;
+
   float pos;
   float vel;
   float tor;
   float kp;
   float kd;
+
   float Tmos;
   float Tcoil;
 

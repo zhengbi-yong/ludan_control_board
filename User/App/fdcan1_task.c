@@ -16,7 +16,8 @@
 #include "fdcan1_task.h"
 #include "cmsis_os2.h"
 #include "fdcan.h"
-
+#define MOTOR_ENABLE_MAX_RETRY 20   // 最多重试次数
+#define MOTOR_ENABLE_INTERVAL_MS 25 // 每次重试间隔
 chassis_t chassis_move;
 
 uint32_t CHASSR_TIME = 1;
@@ -46,47 +47,34 @@ void fdcan1_task_(void) {
 }
 
 void fdcan1_init(chassis_t *chassis) {
-  joint_motor_init(&chassis->joint_motor[0], 1, MIT_MODE);
-  joint_motor_init(&chassis->joint_motor[1], 2, MIT_MODE);
-  joint_motor_init(&chassis->joint_motor[2], 3, MIT_MODE);
-  joint_motor_init(&chassis->joint_motor[3], 4, MIT_MODE);
-  joint_motor_init(&chassis->joint_motor[4], 5, MIT_MODE);
-  joint_motor_init(&chassis->joint_motor[5], 6, MIT_MODE);
-  joint_motor_init(&chassis->joint_motor[6], 7, MIT_MODE);
-  osDelay(200);
-  for (int j = 0; j < 10; j++) {
-    enable_motor_mode(&hfdcan1, chassis->joint_motor[0].para.id,
-                      chassis->joint_motor[0].mode);
-    osDelay(50);
+  // 初始化电机参数
+  for (int i = 0; i < 7; i++) {
+    joint_motor_init(&chassis->joint_motor[i], i + 1, MIT_MODE);
   }
-  for (int j = 0; j < 10; j++) {
-    enable_motor_mode(&hfdcan1, chassis->joint_motor[1].para.id,
-                      chassis->joint_motor[1].mode);
-    osDelay(25);
+
+  osDelay(100);
+
+  // 遍历所有电机，逐个尝试使能
+  for (int i = 0; i < 7; i++) {
+    Joint_Motor_t *motor = &chassis->joint_motor[i];
+    uint8_t enable_ok = 0;
+    uint32_t retry_count = 0;
+
+    while (!enable_ok && retry_count < MOTOR_ENABLE_MAX_RETRY) {
+      enable_motor_mode(&hfdcan1, motor->para.id, motor->mode);
+      osDelay(MOTOR_ENABLE_INTERVAL_MS);
+
+      // 反馈帧由 FDCAN 回调更新 motor->para.enabled / state
+      if (motor->para.enabled == 1 || motor->para.state == 1) {
+        enable_ok = 1;
+      } else {
+        retry_count++;
+      }
+    }
+
+    // 若超出最大次数仍未成功，可在此处添加故障处理逻辑（如上报错误）
+    osDelay(10); // 防止CAN总线拥堵
   }
-  for (int j = 0; j < 10; j++) {
-    enable_motor_mode(&hfdcan1, chassis->joint_motor[2].para.id,
-                      chassis->joint_motor[2].mode);
-    osDelay(25);
-  }
-  for (int j = 0; j < 10; j++) {
-    enable_motor_mode(&hfdcan1, chassis->joint_motor[3].para.id,
-                      chassis->joint_motor[3].mode);
-    osDelay(25);
-  }
-  for (int j = 0; j < 10; j++) {
-    enable_motor_mode(&hfdcan1, chassis->joint_motor[4].para.id,
-                      chassis->joint_motor[4].mode);
-    osDelay(25);
-  }
-  for (int j = 0; j < 10; j++) {
-    enable_motor_mode(&hfdcan1, chassis->joint_motor[5].para.id,
-                      chassis->joint_motor[5].mode);
-    osDelay(25);
-  }
-  for (int j = 0; j < 10; j++) {
-    enable_motor_mode(&hfdcan1, chassis->joint_motor[6].para.id,
-                      chassis->joint_motor[6].mode);
-    osDelay(25);
-  }
+
+  chassis->start_flag = 1;
 }

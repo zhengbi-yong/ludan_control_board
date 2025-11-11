@@ -137,38 +137,38 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan,
       HAL_FDCAN_GetRxMessage(hfdcan, FDCAN_RX_FIFO0, &RxHeader1, g_Can1RxData);
 
       switch (RxHeader1.Identifier) {
-      case 0x19:
-        dm4340_fbdata(&chassis_move.joint_motor[13], g_Can1RxData,
+      case 0x17:
+        dm4310_fbdata(&chassis_move.joint_motor[6], g_Can1RxData,
                       RxHeader1.DataLength);
         mybuff[0]++;
         break;
-      case 0x18:
-        dm4340_fbdata(&chassis_move.joint_motor[12], g_Can1RxData,
+      case 0x16:
+        dm4310_fbdata(&chassis_move.joint_motor[5], g_Can1RxData,
                       RxHeader1.DataLength);
         mybuff[1]++;
         break;
-      case 0x17:
-        dm4340_fbdata(&chassis_move.joint_motor[11], g_Can1RxData,
+      case 0x15:
+        dm4310_fbdata(&chassis_move.joint_motor[4], g_Can1RxData,
                       RxHeader1.DataLength);
         mybuff[2]++;
         break;
-      case 0x15:
-        dm4340_fbdata(&chassis_move.joint_motor[10], g_Can1RxData,
+      case 0x14:
+        dm4310_fbdata(&chassis_move.joint_motor[3], g_Can1RxData,
                       RxHeader1.DataLength);
         mybuff[3]++;
         break;
-      case 0x1A:
-        dm4340_fbdata(&chassis_move.joint_motor[9], g_Can1RxData,
+      case 0x13:
+        dm4310_fbdata(&chassis_move.joint_motor[2], g_Can1RxData,
                       RxHeader1.DataLength);
         mybuff[4]++;
         break;
       case 0x12:
-        dm4340_fbdata(&chassis_move.joint_motor[8], g_Can1RxData,
+        dm4310_fbdata(&chassis_move.joint_motor[1], g_Can1RxData,
                       RxHeader1.DataLength);
         mybuff[5]++;
         break;
       case 0x11:
-        dm4340_fbdata(&chassis_move.joint_motor[7], g_Can1RxData,
+        dm4310_fbdata(&chassis_move.joint_motor[0], g_Can1RxData,
                       RxHeader1.DataLength);
         mybuff[6]++;
         break;

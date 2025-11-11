@@ -63,21 +63,35 @@ void wheel_motor_init(Wheel_Motor_t *motor, uint16_t id, uint16_t mode) {
 * @details:
 ************************************************************************
 **/
-void dm4310_fbdata(Joint_Motor_t *motor, uint8_t *rx_data, uint32_t data_len) {
-  if (data_len == FDCAN_DLC_BYTES_8) {
-    motor->para.id = (rx_data[0]) & 0x0F;
-    motor->para.state = (rx_data[0]) >> 4;
-    motor->para.p_int = (rx_data[1] << 8) | rx_data[2];
-    motor->para.v_int = (rx_data[3] << 4) | (rx_data[4] >> 4);
-    motor->para.t_int = ((rx_data[4] & 0xF) << 8) | rx_data[5];
-    motor->para.pos =
-        uint_to_float(motor->para.p_int, P_MIN1, P_MAX1, 16); // (-12.5,12.5)
-    motor->para.vel =
-        uint_to_float(motor->para.v_int, V_MIN1, V_MAX1, 12); // (-30.0,30.0)
-    motor->para.tor =
-        uint_to_float(motor->para.t_int, T_MIN1, T_MAX1, 12); // (-10.0,10.0)
-    motor->para.Tmos = (float)(rx_data[6]);
-    motor->para.Tcoil = (float)(rx_data[7]);
+void dm4310_fbdata(Joint_Motor_t *motor, uint8_t *rx_data, uint32_t len) {
+  if (len != FDCAN_DLC_BYTES_8)
+    return;
+
+  uint8_t id_low = rx_data[0] & 0x0F;
+  uint8_t err_code = rx_data[0] >> 4;
+
+  motor->para.id = id_low;
+  motor->para.state = err_code;
+
+  // 解析原始数据
+  motor->para.p_int = (rx_data[1] << 8) | rx_data[2];
+  motor->para.v_int = (rx_data[3] << 4) | (rx_data[4] >> 4);
+  motor->para.t_int = ((rx_data[4] & 0x0F) << 8) | rx_data[5];
+
+  // 使用uint_to_float保证映射精度
+  motor->para.pos = uint_to_float(motor->para.p_int, P_MIN1, P_MAX1, 16);
+  motor->para.vel = uint_to_float(motor->para.v_int, V_MIN1, V_MAX1, 12);
+  motor->para.tor = uint_to_float(motor->para.t_int, T_MIN1, T_MAX1, 12);
+
+  // 温度信息
+  motor->para.Tmos = (float)rx_data[6];
+  motor->para.Tcoil = (float)rx_data[7];
+
+  // 状态判断
+  if (err_code == 0) {
+    motor->para.enabled = 1;
+  } else {
+    motor->para.enabled = 0;
   }
 }
 
