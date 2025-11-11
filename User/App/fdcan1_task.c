@@ -53,6 +53,7 @@ void fdcan1_init(chassis_t *chassis) {
   joint_motor_init(&chassis->joint_motor[4], 5, MIT_MODE);
   joint_motor_init(&chassis->joint_motor[5], 6, MIT_MODE);
   joint_motor_init(&chassis->joint_motor[6], 7, MIT_MODE);
+  osDelay(100);
   for (int j = 0; j < 10; j++) {
     enable_motor_mode(&hfdcan1, chassis->joint_motor[0].para.id,
                       chassis->joint_motor[0].mode);
