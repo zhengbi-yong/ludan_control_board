@@ -4,7 +4,7 @@
 #include "fdcan.h"
 #include "motor_config.h"
 
-#define MAX_MOTORS_PER_BUS 7 // 每条总线最多电机数量，可按需求调整
+#define MAX_MOTORS_PER_BUS 16 // 每条总线最多电机数量，可按需求调整
 
 typedef struct {
   FDCAN_HandleTypeDef *hfdcan; // 绑定的FDCAN句柄

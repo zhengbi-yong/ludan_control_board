@@ -46,14 +46,14 @@ void fdcan1_task_(void) {
 
 void fdcan1_init(fdcan_bus_t *bus) {
   // 初始化电机参数
-  for (int i = 0; i < 7; i++) {
+  for (int i = 0; i < MAX_MOTORS_PER_BUS; i++) {
     joint_motor_init(&bus->motor[i], i + 1, MIT_MODE);
   }
 
   osDelay(100);
 
   // 遍历所有电机，逐个尝试使能
-  for (int i = 0; i < 7; i++) {
+  for (int i = 0; i < MAX_MOTORS_PER_BUS; i++) {
     Joint_Motor_t *motor = &bus->motor[i];
     uint8_t enable_ok = 0;
     uint32_t retry_count = 0;
