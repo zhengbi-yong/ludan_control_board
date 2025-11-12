@@ -3,6 +3,9 @@
 #include "fdcan1_task.h"
 #include "motor_config.h"
 #include "string.h"
+#if defined(osCMSIS) && (osCMSIS >= 0x20000U)
+#include "cmsis_os2.h"
+#endif
 FDCAN_RxHeaderTypeDef RxHeader1;
 uint8_t g_Can1RxData[64];
 
@@ -91,6 +94,19 @@ void FDCAN2_Config(void) {
   }
 }
 
+static void fdcan_tx_delay(uint32_t delay_ms) {
+#if defined(osCMSIS) && (osCMSIS >= 0x20000U)
+  if (osKernelGetState() == osKernelRunning) {
+    osDelay(delay_ms);
+    return;
+  }
+#endif
+  HAL_Delay(delay_ms);
+}
+
+#define FDCAN_TX_MAX_ATTEMPTS 100U
+#define FDCAN_TX_RETRY_DELAY_MS 1U
+
 uint8_t canx_send_data(FDCAN_HandleTypeDef *hcan, uint16_t id, uint8_t *data,
                        uint32_t len) {
   FDCAN_TxHeaderTypeDef TxHeader;
@@ -121,8 +137,20 @@ uint8_t canx_send_data(FDCAN_HandleTypeDef *hcan, uint16_t id, uint8_t *data,
   TxHeader.TxEventFifoControl = FDCAN_NO_TX_EVENTS;
   TxHeader.MessageMarker = 0;
 
-  HAL_FDCAN_AddMessageToTxFifoQ(hcan, &TxHeader, data);
-  return 0;
+  for (uint32_t attempt = 0; attempt < FDCAN_TX_MAX_ATTEMPTS; ++attempt) {
+    if (HAL_FDCAN_GetTxFifoFreeLevel(hcan) == 0U) {
+      fdcan_tx_delay(FDCAN_TX_RETRY_DELAY_MS);
+      continue;
+    }
+
+    if (HAL_FDCAN_AddMessageToTxFifoQ(hcan, &TxHeader, data) == HAL_OK) {
+      return 0;
+    }
+
+    fdcan_tx_delay(FDCAN_TX_RETRY_DELAY_MS);
+  }
+
+  return 1;
 }
 
 int64_t mybuff[7] = {0};
