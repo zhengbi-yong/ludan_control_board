@@ -35,6 +35,15 @@ void fdcan2_task_(void) {
   dm4340_fbdata_init(&fdcan2_bus.motor[4]);
   dm4340_fbdata_init(&fdcan2_bus.motor[5]);
   dm4340_fbdata_init(&fdcan2_bus.motor[6]);
+  dm4340_fbdata_init(&fdcan2_bus.motor[7]);
+  dm4340_fbdata_init(&fdcan2_bus.motor[8]);
+  dm4340_fbdata_init(&fdcan2_bus.motor[9]);
+  dm4340_fbdata_init(&fdcan2_bus.motor[10]);
+  dm4340_fbdata_init(&fdcan2_bus.motor[11]);
+  dm4340_fbdata_init(&fdcan2_bus.motor[12]);
+  dm4340_fbdata_init(&fdcan2_bus.motor[13]);
+  dm4340_fbdata_init(&fdcan2_bus.motor[14]);
+  dm4340_fbdata_init(&fdcan2_bus.motor[15]);
   fdcan2_bus.start_flag = 1;
   while (1) {
     for (int i = 0; i < fdcan2_bus.motor_count; i++) {
