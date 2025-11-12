@@ -59,7 +59,7 @@ void fdcan2_init(fdcan_bus_t *bus) {
     joint_motor_init(&bus->motor[i], i + 1, MIT_MODE);
   }
 
-  osDelay(100);
+  // osDelay(100);
 
   // 遍历所有电机，逐个尝试使能
   for (int i = 0; i < MAX_MOTORS_PER_BUS; i++) {

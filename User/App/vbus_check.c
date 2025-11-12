@@ -54,7 +54,7 @@ void VBUS_Check_task(void) {
       Power_OUT2_OFF();
       Power_OUT1_OFF();
 
-      for (int j = 0; j < 7; j++) {
+      for (int j = 0; j < fdcan1_bus.motor_count; j++) {
         disable_motor_mode(&hfdcan1, fdcan1_bus.motor[0].para.id,
                            fdcan1_bus.motor[0].mode);
         disable_motor_mode(&hfdcan1, fdcan1_bus.motor[1].para.id,
@@ -71,7 +71,7 @@ void VBUS_Check_task(void) {
                            fdcan1_bus.motor[6].mode);
         osDelay(5);
       }
-      for (int j = 0; j < 7; j++) {
+      for (int j = 0; j < fdcan2_bus.motor_count; j++) {
         disable_motor_mode(&hfdcan2, fdcan2_bus.motor[0].para.id,
                            fdcan2_bus.motor[0].mode);
         disable_motor_mode(&hfdcan2, fdcan2_bus.motor[1].para.id,
