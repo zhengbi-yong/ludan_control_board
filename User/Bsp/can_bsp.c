@@ -289,37 +289,37 @@ void HAL_FDCAN_RxFifo1Callback(FDCAN_HandleTypeDef *hfdcan,
           mybuff2[7]++;
           break;
         case 0x17:
-          dm4340_fbdata(&fdcan2_bus.motor[6], g_Can2RxData,
+          dm4310_fbdata(&fdcan2_bus.motor[6], g_Can2RxData,
                         RxHeader2.DataLength);
           mybuff2[6]++;
           break;
         case 0x16:
-          dm4340_fbdata(&fdcan2_bus.motor[5], g_Can2RxData,
+          dm4310_fbdata(&fdcan2_bus.motor[5], g_Can2RxData,
                         RxHeader2.DataLength);
           mybuff2[5]++;
           break;
         case 0x15:
-          dm4340_fbdata(&fdcan2_bus.motor[4], g_Can2RxData,
+          dm4310_fbdata(&fdcan2_bus.motor[4], g_Can2RxData,
                         RxHeader2.DataLength);
           mybuff2[4]++;
           break;
         case 0x14:
-          dm4340_fbdata(&fdcan2_bus.motor[3], g_Can2RxData,
+          dm4310_fbdata(&fdcan2_bus.motor[3], g_Can2RxData,
                         RxHeader2.DataLength);
           mybuff2[3]++;
           break;
         case 0x13:
-          dm4340_fbdata(&fdcan2_bus.motor[2], g_Can2RxData,
+          dm4310_fbdata(&fdcan2_bus.motor[2], g_Can2RxData,
                         RxHeader2.DataLength);
           mybuff2[2]++;
           break;
         case 0x12:
-          dm4340_fbdata(&fdcan2_bus.motor[1], g_Can2RxData,
+          dm4310_fbdata(&fdcan2_bus.motor[1], g_Can2RxData,
                         RxHeader2.DataLength);
           mybuff2[1]++;
           break;
         case 0x11:
-          dm4340_fbdata(&fdcan2_bus.motor[0], g_Can2RxData,
+          dm4310_fbdata(&fdcan2_bus.motor[0], g_Can2RxData,
                         RxHeader2.DataLength);
           mybuff2[0]++;
           break;
