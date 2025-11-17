@@ -23,9 +23,8 @@
 extern UART_HandleTypeDef huart1;
 extern send_data_t send_data;
 
-#define MOTOR_NUM 14
-#define FRAME_LENGTH 72
-#define LOAD_LENGTH 71
+#define FRAME_LENGTH 152
+#define LOAD_LENGTH 151
 // extern chassis_t chassis_move;
 extern fdcan_bus_t fdcan1_bus;
 extern fdcan_bus_t fdcan2_bus;

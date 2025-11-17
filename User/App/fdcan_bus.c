@@ -7,12 +7,12 @@ extern FDCAN_HandleTypeDef hfdcan2;
 // 定义两条总线的全局对象
 fdcan_bus_t fdcan1_bus = {
     .hfdcan = &hfdcan1,
-    .motor_count = 16,
+    .motor_count = 15,
     .start_flag = 0,
 };
 
 fdcan_bus_t fdcan2_bus = {
     .hfdcan = &hfdcan2,
-    .motor_count = 16,
+    .motor_count = 15,
     .start_flag = 0,
 };

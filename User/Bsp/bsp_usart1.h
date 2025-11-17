@@ -6,9 +6,8 @@
 #define READ_DATA_CHECK 0 // Receive data to check flag bits
 #define FRAME_HEADER 0X7B // Frame head
 #define FRAME_TAIL 0X7D   // Frame tail
-#define RECEIVE_DATA_SIZE                                                      \
-  11 // The length of the data sent by the lower computer
-#define SEND_DATA_SIZE 72
+#define RECEIVE_DATA_SIZE 11
+#define SEND_DATA_SIZE 152
 
 typedef struct {
   uint8_t tx[SEND_DATA_SIZE];

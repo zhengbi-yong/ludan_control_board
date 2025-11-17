@@ -16,15 +16,16 @@ FDCAN_RxHeaderTypeDef RxHeader3;
 uint8_t g_Can3RxData[64];
 extern fdcan_bus_t fdcan1_bus;
 extern fdcan_bus_t fdcan2_bus;
+
 void FDCAN1_Config(void) {
   FDCAN_FilterTypeDef sFilterConfig;
   /* Configure Rx filter */
   sFilterConfig.IdType = FDCAN_STANDARD_ID;
   sFilterConfig.FilterIndex = 0;
-  sFilterConfig.FilterType = FDCAN_FILTER_MASK;
+  sFilterConfig.FilterType = FDCAN_FILTER_RANGE;
   sFilterConfig.FilterConfig = FDCAN_FILTER_TO_RXFIFO0;
-  sFilterConfig.FilterID1 = 0x00000000; //
-  sFilterConfig.FilterID2 = 0x00000000; //
+  sFilterConfig.FilterID1 = 0x11; //
+  sFilterConfig.FilterID2 = 0x1F; //
   if (HAL_FDCAN_ConfigFilter(&hfdcan1, &sFilterConfig) != HAL_OK) {
     Error_Handler();
   }
@@ -34,6 +35,7 @@ void FDCAN1_Config(void) {
                                    FDCAN_FILTER_REMOTE) != HAL_OK) {
     Error_Handler();
   }
+
   if (HAL_FDCAN_Start(&hfdcan1) != HAL_OK) {
     Error_Handler();
   }
@@ -42,54 +44,35 @@ void FDCAN1_Config(void) {
                                      0) != HAL_OK) {
     Error_Handler();
   }
-  /* Activate Rx FIFO 0 new message notification on both FDCAN instances */
-
-  if (HAL_FDCAN_ConfigFilter(&hfdcan3, &sFilterConfig) != HAL_OK) {
-    Error_Handler();
-  }
-  if (HAL_FDCAN_ConfigGlobalFilter(&hfdcan3, FDCAN_REJECT, FDCAN_REJECT,
-                                   FDCAN_FILTER_REMOTE,
-                                   FDCAN_FILTER_REMOTE) != HAL_OK) {
-    Error_Handler();
-  }
-  if (HAL_FDCAN_ActivateNotification(&hfdcan3, FDCAN_IT_RX_FIFO0_NEW_MESSAGE,
-                                     0) != HAL_OK) {
-    Error_Handler();
-  }
-  if (HAL_FDCAN_Start(&hfdcan3) != HAL_OK) {
-    Error_Handler();
-  }
 }
 
 void FDCAN2_Config(void) {
   FDCAN_FilterTypeDef sFilterConfig;
-  /* Configure Rx filter */
+
+  // 接收标准 ID 0x11~0x1F
   sFilterConfig.IdType = FDCAN_STANDARD_ID;
-  sFilterConfig.FilterIndex = 1;
-  sFilterConfig.FilterType = FDCAN_FILTER_MASK;
+  sFilterConfig.FilterIndex = 0;
+  sFilterConfig.FilterType = FDCAN_FILTER_RANGE;
   sFilterConfig.FilterConfig = FDCAN_FILTER_TO_RXFIFO1;
-  sFilterConfig.FilterID1 = 0x00000000;
-  sFilterConfig.FilterID2 = 0x00000000;
+  sFilterConfig.FilterID1 = 0x11; // 范围起始
+  sFilterConfig.FilterID2 = 0x1F; // 范围结束
+
   if (HAL_FDCAN_ConfigFilter(&hfdcan2, &sFilterConfig) != HAL_OK) {
     Error_Handler();
   }
 
-  /* Configure global filter:
-     Filter all remote frames with STD and EXT ID
-     Reject non matching frames with STD ID and EXT ID */
   if (HAL_FDCAN_ConfigGlobalFilter(&hfdcan2, FDCAN_REJECT, FDCAN_REJECT,
                                    FDCAN_FILTER_REMOTE,
                                    FDCAN_FILTER_REMOTE) != HAL_OK) {
     Error_Handler();
   }
 
-  /* Activate Rx FIFO 0 new message notification on both FDCAN instances */
-  if (HAL_FDCAN_ActivateNotification(&hfdcan2, FDCAN_IT_RX_FIFO1_NEW_MESSAGE,
-                                     0) != HAL_OK) {
+  if (HAL_FDCAN_Start(&hfdcan2) != HAL_OK) {
     Error_Handler();
   }
 
-  if (HAL_FDCAN_Start(&hfdcan2) != HAL_OK) {
+  if (HAL_FDCAN_ActivateNotification(&hfdcan2, FDCAN_IT_RX_FIFO1_NEW_MESSAGE,
+                                     0) != HAL_OK) {
     Error_Handler();
   }
 }
@@ -120,7 +103,6 @@ uint8_t canx_send_data(FDCAN_HandleTypeDef *hcan, uint16_t id, uint8_t *data,
     TxHeader.DataLength = FDCAN_DLC_BYTES_12;
   } else if (len == 16) {
     TxHeader.DataLength = FDCAN_DLC_BYTES_16;
-
   } else if (len == 20) {
     TxHeader.DataLength = FDCAN_DLC_BYTES_20;
   } else if (len == 24) {
