@@ -1,3 +1,13 @@
+/**
+ * @file can_bsp.h
+ * @author Zhengbi Yong (zhengbi.yong@outlook.com)
+ * @brief 
+ * @version 0.1
+ * @date 2025-11-18
+ * 
+ * Zhengbi Yong
+ * 
+ */
 #ifndef _CAN_BSP_H
 #define _CAN_BSP_H
 

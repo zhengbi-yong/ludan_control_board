@@ -1,3 +1,13 @@
+/**
+ * @file can_bsp.c
+ * @author Zhengbi Yong (zhengbi.yong@outlook.com)
+ * @brief 
+ * @version 0.1
+ * @date 2025-11-18
+ * 
+ * Zhengbi Yong
+ * 
+ */
 #include "can_bsp.h"
 #include "fdcan.h"
 #include "fdcan1_task.h"

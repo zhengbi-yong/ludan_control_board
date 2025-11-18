@@ -1,3 +1,13 @@
+/**
+ * @file motor_config.c
+ * @author Zhengbi Yong (zhengbi.yong@outlook.com)
+ * @brief 
+ * @version 0.1
+ * @date 2025-11-18
+ * 
+ * Zhengbi Yong
+ * 
+ */
 #include "motor_config.h"
 #include "arm_math.h"
 #include "fdcan.h"

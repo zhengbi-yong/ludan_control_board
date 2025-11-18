@@ -1,20 +1,13 @@
 /**
-  ****************************(C) COPYRIGHT 2016 DJI****************************
-  * @file       pid.c/h
-  * @brief      pid实现函数，包括初始化，PID计算函数，
-  * @note       
-  * @history
-  *  Version    Date            Author          Modification
-  *  V1.0.0     Dec-26-2018     RM              1. 完成
-  *
-  @verbatim
-  ==============================================================================
-
-  ==============================================================================
-  @endverbatim
-  ****************************(C) COPYRIGHT 2016 DJI****************************
-  */
-
+ * @file pid.c
+ * @author Zhengbi Yong (zhengbi.yong@outlook.com)
+ * @brief 
+ * @version 0.1
+ * @date 2025-11-18
+ * 
+ * Zhengbi Yong
+ * 
+ */
 #include "pid.h"
 
 #define LimitMax(input, max)   \

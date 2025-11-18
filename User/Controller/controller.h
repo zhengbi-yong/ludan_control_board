@@ -1,16 +1,13 @@
 /**
-  ******************************************************************************
-  * @file	 controller.h
-  * @author  Wang Hongxi
-  * @author  Zhang Hongyu (fuzzy pid)
-  * @version V1.1.3
-  * @date    2021/7/3
-  * @brief   
-  ******************************************************************************
-  * @attention 
-  *
-  ******************************************************************************
-  */
+ * @file controller.h
+ * @author Zhengbi Yong (zhengbi.yong@outlook.com)
+ * @brief 
+ * @version 0.1
+ * @date 2025-11-18
+ * 
+ * Zhengbi Yong
+ * 
+ */
 #ifndef _CONTROLLER_H
 #define _CONTROLLER_H
 

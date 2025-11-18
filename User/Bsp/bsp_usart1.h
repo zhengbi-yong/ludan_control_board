@@ -1,3 +1,13 @@
+/**
+ * @file bsp_usart1.h
+ * @author Zhengbi Yong (zhengbi.yong@outlook.com)
+ * @brief 
+ * @version 0.1
+ * @date 2025-11-18
+ * 
+ * Zhengbi Yong
+ * 
+ */
 #ifndef VISION_UART_H
 #define VISION_UART_H
 #include "main.h"

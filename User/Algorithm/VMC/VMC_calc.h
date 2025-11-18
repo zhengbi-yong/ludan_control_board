@@ -1,3 +1,13 @@
+/**
+ * @file VMC_calc.h
+ * @author Zhengbi Yong (zhengbi.yong@outlook.com)
+ * @brief 
+ * @version 0.1
+ * @date 2025-11-18
+ * 
+ * Zhengbi Yong
+ * 
+ */
 #ifndef __VMC_CALC_H
 #define __VMC_CALC_H
 
@@ -6,38 +16,38 @@
 
 #define pi 3.1415926f
 #define LEG_PID_KP  350.0f
-#define LEG_PID_KI  0.0f//²»»ý·Ö
+#define LEG_PID_KI  0.0f//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 #define LEG_PID_KD  3000.0f
 #define LEG_PID_MAX_OUT  90.0f //90Å£
 #define LEG_PID_MAX_IOUT 0.0f
 
 typedef struct
 {
-	/*×óÓÒÁ½ÍÈµÄ¹«¹²²ÎÊý£¬¹Ì¶¨²»±ä*/
-	float l5;//AE³¤¶È //µ¥Î»Îªm
-	float	l1;//µ¥Î»Îªm
-	float l2;//µ¥Î»Îªm
-	float l3;//µ¥Î»Îªm
-	float l4;//µ¥Î»Îªm
+	/*ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ÈµÄ¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ì¶ï¿½ï¿½ï¿½ï¿½ï¿½*/
+	float l5;//AEï¿½ï¿½ï¿½ï¿½ //ï¿½ï¿½Î»Îªm
+	float	l1;//ï¿½ï¿½Î»Îªm
+	float l2;//ï¿½ï¿½Î»Îªm
+	float l3;//ï¿½ï¿½Î»Îªm
+	float l4;//ï¿½ï¿½Î»Îªm
 	
-	float XB,YB;//BµãµÄ×ø±ê
-	float XD,YD;//DµãµÄ×ø±ê
+	float XB,YB;//Bï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	float XD,YD;//Dï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	
-	float XC,YC;//CµãµÄÖ±½Ç×ø±ê
-	float L0,phi0;//CµãµÄ¼«×ø±ê
+	float XC,YC;//Cï¿½ï¿½ï¿½Ö±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	float L0,phi0;//Cï¿½ï¿½Ä¼ï¿½ï¿½ï¿½ï¿½ï¿½
 	float alpha;
 	float d_alpha;	
 	
-	float	lBD;//BDÁ½µãµÄ¾àÀë
+	float	lBD;//BDï¿½ï¿½ï¿½ï¿½Ä¾ï¿½ï¿½ï¿½
 	
-	float d_phi0;//ÏÖÔÚCµã½Ç¶Èphi0µÄ±ä»»ÂÊ
-	float last_phi0;//ÉÏÒ»´ÎCµã½Ç¶È£¬ÓÃÓÚ¼ÆËã½Ç¶Èphi0µÄ±ä»»ÂÊd_phi0
+	float d_phi0;//ï¿½ï¿½ï¿½ï¿½Cï¿½ï¿½Ç¶ï¿½phi0ï¿½Ä±ä»»ï¿½ï¿½
+	float last_phi0;//ï¿½ï¿½Ò»ï¿½ï¿½Cï¿½ï¿½Ç¶È£ï¿½ï¿½ï¿½ï¿½Ú¼ï¿½ï¿½ï¿½Ç¶ï¿½phi0ï¿½Ä±ä»»ï¿½ï¿½d_phi0
 
-	float A0,B0,C0;//ÖÐ¼ä±äÁ¿
+	float A0,B0,C0;//ï¿½Ð¼ï¿½ï¿½ï¿½ï¿½
 	float phi2,phi3;
 	float phi1,phi4;
 	
-	float j11,j12,j21,j22;//µÑ¿¨¶û¿Õ¼äÁ¦µ½¹Ø½Ú¿Õ¼äµÄÁ¦µÄÑÅ¿É±È¾ØÕóÏµÊý
+	float j11,j12,j21,j22;//ï¿½Ñ¿ï¿½ï¿½ï¿½ï¿½Õ¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ø½Ú¿Õ¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å¿É±È¾ï¿½ï¿½ï¿½Ïµï¿½ï¿½
 	float torque_set[2];
 
 	float F0;
@@ -45,29 +55,29 @@ typedef struct
 	float F02;
 	
 	float theta;
-	float d_theta;//thetaµÄÒ»½×µ¼Êý
+	float d_theta;//thetaï¿½ï¿½Ò»ï¿½×µï¿½ï¿½ï¿½
 	float last_d_theta;
-	float dd_theta;//thetaµÄ¶þ½×µ¼Êý
+	float dd_theta;//thetaï¿½Ä¶ï¿½ï¿½×µï¿½ï¿½ï¿½
 	
-	float d_L0;//L0µÄÒ»½×µ¼Êý
-	float dd_L0;//L0µÄ¶þ½×µ¼Êý
+	float d_L0;//L0ï¿½ï¿½Ò»ï¿½×µï¿½ï¿½ï¿½
+	float dd_L0;//L0ï¿½Ä¶ï¿½ï¿½×µï¿½ï¿½ï¿½
 	float last_L0;
 	float last_d_L0;
 	
-	float FN;//Ö§³ÖÁ¦
+	float FN;//Ö§ï¿½ï¿½ï¿½ï¿½
 	
 	uint8_t first_flag;
-	uint8_t leg_flag;//ÍÈ³¤Íê³É±êÖ¾
+	uint8_t leg_flag;//ï¿½È³ï¿½ï¿½ï¿½É±ï¿½Ö¾
 } vmc_leg_t;
 
-extern void VMC_init(vmc_leg_t *vmc);//¸ø¸Ë³¤¸³Öµ
+extern void VMC_init(vmc_leg_t *vmc);//ï¿½ï¿½ï¿½Ë³ï¿½ï¿½ï¿½Öµ
 
-extern void VMC_calc_1_right(vmc_leg_t *vmc,INS_t *ins,float dt);//¼ÆËãthetaºÍd_theta¸ølqrÓÃ£¬Í¬Ê±Ò²¼ÆËãÍÈ³¤L0
+extern void VMC_calc_1_right(vmc_leg_t *vmc,INS_t *ins,float dt);//ï¿½ï¿½ï¿½ï¿½thetaï¿½ï¿½d_thetaï¿½ï¿½lqrï¿½Ã£ï¿½Í¬Ê±Ò²ï¿½ï¿½ï¿½ï¿½ï¿½È³ï¿½L0
 extern void VMC_calc_1_left(vmc_leg_t *vmc,INS_t *ins,float dt);
-extern void VMC_calc_2(vmc_leg_t *vmc);//¼ÆËãÆÚÍûµÄ¹Ø½ÚÊä³öÁ¦¾Ø
+extern void VMC_calc_2(vmc_leg_t *vmc);//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¹Ø½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
-extern uint8_t ground_detectionR(vmc_leg_t *vmc,INS_t *ins);//ÓÒÍÈÀëµØ¼ì²â
-extern uint8_t ground_detectionL(vmc_leg_t *vmc,INS_t *ins);//×óÍÈÀëµØ¼ì²â
+extern uint8_t ground_detectionR(vmc_leg_t *vmc,INS_t *ins);//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ø¼ï¿½ï¿½
+extern uint8_t ground_detectionL(vmc_leg_t *vmc,INS_t *ins);//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ø¼ï¿½ï¿½
 
 extern float LQR_K_calc(float *coe,float len);
 	

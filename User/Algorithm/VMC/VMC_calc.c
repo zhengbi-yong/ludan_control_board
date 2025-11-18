@@ -1,25 +1,35 @@
+/**
+ * @file VMC_calc.c
+ * @author Zhengbi Yong (zhengbi.yong@outlook.com)
+ * @brief 
+ * @version 0.1
+ * @date 2025-11-18
+ * 
+ * Zhengbi Yong
+ * 
+ */
 #include "VMC_calc.h"
 
-void VMC_init(vmc_leg_t *vmc)//¸ø¸Ë³¤¸³Öµ
+void VMC_init(vmc_leg_t *vmc)//ï¿½ï¿½ï¿½Ë³ï¿½ï¿½ï¿½Öµ
 {
-	vmc->l5=0.088f;//AE³¤¶È //µ¥Î»Îªm
-	vmc->l1=0.0833f;//µ¥Î»Îªm
-	vmc->l2=0.16f;//µ¥Î»Îªm
-	vmc->l3=0.16f;//µ¥Î»Îªm
-	vmc->l4=0.0833f;//µ¥Î»Îªm
+	vmc->l5=0.088f;//AEï¿½ï¿½ï¿½ï¿½ //ï¿½ï¿½Î»Îªm
+	vmc->l1=0.0833f;//ï¿½ï¿½Î»Îªm
+	vmc->l2=0.16f;//ï¿½ï¿½Î»Îªm
+	vmc->l3=0.16f;//ï¿½ï¿½Î»Îªm
+	vmc->l4=0.0833f;//ï¿½ï¿½Î»Îªm
 }
 
-void VMC_calc_1_right(vmc_leg_t *vmc,INS_t *ins,float dt)//¼ÆËãthetaºÍd_theta¸ølqrÓÃ£¬Í¬Ê±Ò²¼ÆËãÍÈ³¤L0
+void VMC_calc_1_right(vmc_leg_t *vmc,INS_t *ins,float dt)//ï¿½ï¿½ï¿½ï¿½thetaï¿½ï¿½d_thetaï¿½ï¿½lqrï¿½Ã£ï¿½Í¬Ê±Ò²ï¿½ï¿½ï¿½ï¿½ï¿½È³ï¿½L0
 {		
 		static float PitchR=0.0f;
 	  static float PithGyroR=0.0f;
 	  PitchR=ins->Pitch;
 	  PithGyroR=ins->Gyro[1];
 	
-	  vmc->YD = vmc->l4*arm_sin_f32(vmc->phi4);//DµÄy×ø±ê
-	  vmc->YB = vmc->l1*arm_sin_f32(vmc->phi1);//BµÄy×ø±ê
-	  vmc->XD = vmc->l5 + vmc->l4*arm_cos_f32(vmc->phi4);//DµÄx×ø±ê
-	  vmc->XB = vmc->l1*arm_cos_f32(vmc->phi1); //BµÄx×ø±ê
+	  vmc->YD = vmc->l4*arm_sin_f32(vmc->phi4);//Dï¿½ï¿½yï¿½ï¿½ï¿½ï¿½
+	  vmc->YB = vmc->l1*arm_sin_f32(vmc->phi1);//Bï¿½ï¿½yï¿½ï¿½ï¿½ï¿½
+	  vmc->XD = vmc->l5 + vmc->l4*arm_cos_f32(vmc->phi4);//Dï¿½ï¿½xï¿½ï¿½ï¿½ï¿½
+	  vmc->XB = vmc->l1*arm_cos_f32(vmc->phi1); //Bï¿½ï¿½xï¿½ï¿½ï¿½ï¿½
 			
 		vmc->lBD = sqrt((vmc->XD - vmc->XB)*(vmc->XD - vmc->XB) + (vmc->YD -vmc-> YB)*(vmc->YD - vmc->YB));
 	
@@ -28,13 +38,13 @@ void VMC_calc_1_right(vmc_leg_t *vmc,INS_t *ins,float dt)//¼ÆËãthetaºÍd_theta¸øl
 		vmc->C0 = vmc->l2*vmc->l2 + vmc->lBD*vmc->lBD - vmc->l3*vmc->l3;
 		vmc->phi2 = 2*atan2f((vmc->B0 + sqrt(vmc->A0*vmc->A0 + vmc->B0*vmc->B0 - vmc->C0*vmc->C0)),vmc->A0 + vmc->C0);			
 	  vmc->phi3 = atan2f(vmc->YB-vmc->YD+vmc->l2*arm_sin_f32(vmc->phi2),vmc->XB-vmc->XD+vmc->l2*arm_cos_f32(vmc->phi2));
-	  //CµãÖ±½Ç×ø±ê
+	  //Cï¿½ï¿½Ö±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		vmc->XC = vmc->l1*arm_cos_f32(vmc->phi1) + vmc->l2*arm_cos_f32(vmc->phi2);
 		vmc->YC = vmc->l1*arm_sin_f32(vmc->phi1) + vmc->l2*arm_sin_f32(vmc->phi2);
-		//Cµã¼«×ø±ê
+		//Cï¿½ã¼«ï¿½ï¿½ï¿½ï¿½
 		vmc->L0 = sqrt((vmc->XC - vmc->l5/2.0f)*(vmc->XC - vmc->l5/2.0f) + vmc->YC*vmc->YC);
 		
-	  vmc->phi0 = atan2f(vmc->YC,(vmc->XC - vmc->l5/2.0f));//phi0ÓÃÓÚ¼ÆËãlqrĞèÒªµÄtheta		
+	  vmc->phi0 = atan2f(vmc->YC,(vmc->XC - vmc->l5/2.0f));//phi0ï¿½ï¿½ï¿½Ú¼ï¿½ï¿½ï¿½lqrï¿½ï¿½Òªï¿½ï¿½theta		
 	  vmc->alpha=pi/2.0f-vmc->phi0 ;
 		
 		if(vmc->first_flag==0)
@@ -42,16 +52,16 @@ void VMC_calc_1_right(vmc_leg_t *vmc,INS_t *ins,float dt)//¼ÆËãthetaºÍd_theta¸øl
 			vmc->last_phi0=vmc->phi0 ;
 			vmc->first_flag=1;
 		}
-		vmc->d_phi0=(vmc->phi0-vmc->last_phi0)/dt;//¼ÆËãphi0±ä»¯ÂÊ£¬d_phi0ÓÃÓÚ¼ÆËãlqrĞèÒªµÄd_theta
+		vmc->d_phi0=(vmc->phi0-vmc->last_phi0)/dt;//ï¿½ï¿½ï¿½ï¿½phi0ï¿½ä»¯ï¿½Ê£ï¿½d_phi0ï¿½ï¿½ï¿½Ú¼ï¿½ï¿½ï¿½lqrï¿½ï¿½Òªï¿½ï¿½d_theta
 		vmc->d_alpha=0.0f-vmc->d_phi0 ;
 		
-		vmc->theta=pi/2.0f-PitchR-vmc->phi0;//µÃµ½×´Ì¬±äÁ¿1
-		vmc->d_theta=(-PithGyroR-vmc->d_phi0);//µÃµ½×´Ì¬±äÁ¿2
+		vmc->theta=pi/2.0f-PitchR-vmc->phi0;//ï¿½Ãµï¿½×´Ì¬ï¿½ï¿½ï¿½ï¿½1
+		vmc->d_theta=(-PithGyroR-vmc->d_phi0);//ï¿½Ãµï¿½×´Ì¬ï¿½ï¿½ï¿½ï¿½2
 		
 		vmc->last_phi0=vmc->phi0 ;
     
-		vmc->d_L0=(vmc->L0-vmc->last_L0)/dt;//ÍÈ³¤L0µÄÒ»½×µ¼Êı
-    vmc->dd_L0=(vmc->d_L0-vmc->last_d_L0)/dt;//ÍÈ³¤L0µÄ¶ş½×µ¼Êı
+		vmc->d_L0=(vmc->L0-vmc->last_L0)/dt;//ï¿½È³ï¿½L0ï¿½ï¿½Ò»ï¿½×µï¿½ï¿½ï¿½
+    vmc->dd_L0=(vmc->d_L0-vmc->last_d_L0)/dt;//ï¿½È³ï¿½L0ï¿½Ä¶ï¿½ï¿½×µï¿½ï¿½ï¿½
 		
 		vmc->last_d_L0=vmc->d_L0;
 		vmc->last_L0=vmc->L0;
@@ -61,17 +71,17 @@ void VMC_calc_1_right(vmc_leg_t *vmc,INS_t *ins,float dt)//¼ÆËãthetaºÍd_theta¸øl
 }
 
 
-void VMC_calc_1_left(vmc_leg_t *vmc,INS_t *ins,float dt)//¼ÆËãthetaºÍd_theta¸ølqrÓÃ£¬Í¬Ê±Ò²¼ÆËãÍÈ³¤L0
+void VMC_calc_1_left(vmc_leg_t *vmc,INS_t *ins,float dt)//ï¿½ï¿½ï¿½ï¿½thetaï¿½ï¿½d_thetaï¿½ï¿½lqrï¿½Ã£ï¿½Í¬Ê±Ò²ï¿½ï¿½ï¿½ï¿½ï¿½È³ï¿½L0
 {		
 	  static float PitchL=0.0f;
 	  static float PithGyroL=0.0f;
 	  PitchL=0.0f-ins->Pitch;
 	  PithGyroL=0.0f-ins->Gyro[1];
 	
-		vmc->YD = vmc->l4*arm_sin_f32(vmc->phi4);//DµÄy×ø±ê
-	  vmc->YB = vmc->l1*arm_sin_f32(vmc->phi1);//BµÄy×ø±ê
-	  vmc->XD = vmc->l5 + vmc->l4*arm_cos_f32(vmc->phi4);//DµÄx×ø±ê
-	  vmc->XB = vmc->l1*arm_cos_f32(vmc->phi1); //BµÄx×ø±ê
+		vmc->YD = vmc->l4*arm_sin_f32(vmc->phi4);//Dï¿½ï¿½yï¿½ï¿½ï¿½ï¿½
+	  vmc->YB = vmc->l1*arm_sin_f32(vmc->phi1);//Bï¿½ï¿½yï¿½ï¿½ï¿½ï¿½
+	  vmc->XD = vmc->l5 + vmc->l4*arm_cos_f32(vmc->phi4);//Dï¿½ï¿½xï¿½ï¿½ï¿½ï¿½
+	  vmc->XB = vmc->l1*arm_cos_f32(vmc->phi1); //Bï¿½ï¿½xï¿½ï¿½ï¿½ï¿½
 			
 		vmc->lBD = sqrt((vmc->XD - vmc->XB)*(vmc->XD - vmc->XB) + (vmc->YD -vmc-> YB)*(vmc->YD - vmc->YB));
 	
@@ -80,13 +90,13 @@ void VMC_calc_1_left(vmc_leg_t *vmc,INS_t *ins,float dt)//¼ÆËãthetaºÍd_theta¸ølq
 		vmc->C0 = vmc->l2*vmc->l2 + vmc->lBD*vmc->lBD - vmc->l3*vmc->l3;
 		vmc->phi2 = 2*atan2f((vmc->B0 + sqrt(vmc->A0*vmc->A0 + vmc->B0*vmc->B0 - vmc->C0*vmc->C0)),vmc->A0 + vmc->C0);			
 	  vmc->phi3 = atan2f(vmc->YB-vmc->YD+vmc->l2*arm_sin_f32(vmc->phi2),vmc->XB-vmc->XD+vmc->l2*arm_cos_f32(vmc->phi2));
-	  //CµãÖ±½Ç×ø±ê
+	  //Cï¿½ï¿½Ö±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		vmc->XC = vmc->l1*arm_cos_f32(vmc->phi1) + vmc->l2*arm_cos_f32(vmc->phi2);
 		vmc->YC = vmc->l1*arm_sin_f32(vmc->phi1) + vmc->l2*arm_sin_f32(vmc->phi2);
-		//Cµã¼«×ø±ê
+		//Cï¿½ã¼«ï¿½ï¿½ï¿½ï¿½
 		vmc->L0 = sqrt((vmc->XC - vmc->l5/2.0f)*(vmc->XC - vmc->l5/2.0f) + vmc->YC*vmc->YC);
 			
-	  vmc->phi0 = atan2f(vmc->YC,(vmc->XC - vmc->l5/2.0f));//phi0ÓÃÓÚ¼ÆËãlqrĞèÒªµÄtheta		
+	  vmc->phi0 = atan2f(vmc->YC,(vmc->XC - vmc->l5/2.0f));//phi0ï¿½ï¿½ï¿½Ú¼ï¿½ï¿½ï¿½lqrï¿½ï¿½Òªï¿½ï¿½theta		
 	  vmc->alpha=pi/2.0f-vmc->phi0 ;
 		
 		if(vmc->first_flag==0)
@@ -94,16 +104,16 @@ void VMC_calc_1_left(vmc_leg_t *vmc,INS_t *ins,float dt)//¼ÆËãthetaºÍd_theta¸ølq
 			vmc->last_phi0=vmc->phi0 ;
 			vmc->first_flag=1;
 		}
-		vmc->d_phi0=(vmc->phi0-vmc->last_phi0)/dt;//¼ÆËãphi0±ä»¯ÂÊ£¬d_phi0ÓÃÓÚ¼ÆËãlqrĞèÒªµÄd_theta
+		vmc->d_phi0=(vmc->phi0-vmc->last_phi0)/dt;//ï¿½ï¿½ï¿½ï¿½phi0ï¿½ä»¯ï¿½Ê£ï¿½d_phi0ï¿½ï¿½ï¿½Ú¼ï¿½ï¿½ï¿½lqrï¿½ï¿½Òªï¿½ï¿½d_theta
 		vmc->d_alpha=0.0f-vmc->d_phi0 ;
 		
-		vmc->theta=pi/2.0f-PitchL-vmc->phi0;//µÃµ½×´Ì¬±äÁ¿1
-		vmc->d_theta=(-PithGyroL-vmc->d_phi0);//µÃµ½×´Ì¬±äÁ¿2
+		vmc->theta=pi/2.0f-PitchL-vmc->phi0;//ï¿½Ãµï¿½×´Ì¬ï¿½ï¿½ï¿½ï¿½1
+		vmc->d_theta=(-PithGyroL-vmc->d_phi0);//ï¿½Ãµï¿½×´Ì¬ï¿½ï¿½ï¿½ï¿½2
 		
 		vmc->last_phi0=vmc->phi0 ;
 
-		vmc->d_L0=(vmc->L0-vmc->last_L0)/dt;//ÍÈ³¤L0µÄÒ»½×µ¼Êı
-    vmc->dd_L0=(vmc->d_L0-vmc->last_d_L0)/dt;//ÍÈ³¤L0µÄ¶ş½×µ¼Êı
+		vmc->d_L0=(vmc->L0-vmc->last_L0)/dt;//ï¿½È³ï¿½L0ï¿½ï¿½Ò»ï¿½×µï¿½ï¿½ï¿½
+    vmc->dd_L0=(vmc->d_L0-vmc->last_d_L0)/dt;//ï¿½È³ï¿½L0ï¿½Ä¶ï¿½ï¿½×µï¿½ï¿½ï¿½
 		
 		vmc->last_d_L0=vmc->d_L0;
 		vmc->last_L0=vmc->L0;
@@ -112,15 +122,15 @@ void VMC_calc_1_left(vmc_leg_t *vmc,INS_t *ins,float dt)//¼ÆËãthetaºÍd_theta¸ølq
 		vmc->last_d_theta=vmc->d_theta;
 }
 
-void VMC_calc_2(vmc_leg_t *vmc)//¼ÆËãÆÚÍûµÄ¹Ø½ÚÊä³öÁ¦¾Ø
+void VMC_calc_2(vmc_leg_t *vmc)//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¹Ø½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 {
 		vmc->j11 = (vmc->l1*arm_sin_f32(vmc->phi0-vmc->phi3)*arm_sin_f32(vmc->phi1-vmc->phi2))/arm_sin_f32(vmc->phi3-vmc->phi2);
 		vmc->j12 = (vmc->l1*arm_cos_f32(vmc->phi0-vmc->phi3)*arm_sin_f32(vmc->phi1-vmc->phi2))/(vmc->L0*arm_sin_f32(vmc->phi3-vmc->phi2));
 		vmc->j21 = (vmc->l4*arm_sin_f32(vmc->phi0-vmc->phi2)*arm_sin_f32(vmc->phi3-vmc->phi4))/arm_sin_f32(vmc->phi3-vmc->phi2);
 		vmc->j22 = (vmc->l4*arm_cos_f32(vmc->phi0-vmc->phi2)*arm_sin_f32(vmc->phi3-vmc->phi4))/(vmc->L0*arm_sin_f32(vmc->phi3-vmc->phi2));
 	
-		vmc->torque_set[0]=vmc->j11*vmc->F0+vmc->j12*vmc->Tp;//µÃµ½RightFrontµÄÊä³öÖáÆÚÍûÁ¦¾Ø£¬F0ÎªÎåÁ¬¸Ë»ú¹¹Ä©¶ËÑØÍÈµÄÍÆÁ¦ 
-		vmc->torque_set[1]=vmc->j21*vmc->F0+vmc->j22*vmc->Tp;//µÃµ½RightBackµÄÊä³öÖáÆÚÍûÁ¦¾Ø£¬TpÎªÑØÖĞĞÄÖáµÄÁ¦¾Ø 
+		vmc->torque_set[0]=vmc->j11*vmc->F0+vmc->j12*vmc->Tp;//ï¿½Ãµï¿½RightFrontï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ø£ï¿½F0Îªï¿½ï¿½ï¿½ï¿½ï¿½Ë»ï¿½ï¿½ï¿½Ä©ï¿½ï¿½ï¿½ï¿½ï¿½Èµï¿½ï¿½ï¿½ï¿½ï¿½ 
+		vmc->torque_set[1]=vmc->j21*vmc->F0+vmc->j22*vmc->Tp;//ï¿½Ãµï¿½RightBackï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ø£ï¿½TpÎªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 
 
 }
 
@@ -138,11 +148,11 @@ uint8_t ground_detectionR(vmc_leg_t *vmc,INS_t *ins)
 	averr[2]=averr[3];
 	averr[3]=vmc->FN;
 	
-	aver_fnr=0.25f*averr[0]+0.25f*averr[1]+0.25f*averr[2]+0.25f*averr[3];//¶ÔÖ§³ÖÁ¦½øĞĞ¾ùÖµÂË²¨
+	aver_fnr=0.25f*averr[0]+0.25f*averr[1]+0.25f*averr[2]+0.25f*averr[3];//ï¿½ï¿½Ö§ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ğ¾ï¿½Öµï¿½Ë²ï¿½
 	
 	
 	if(aver_fnr<3.0f)
-	{//ÀëµØÁË
+	{//ï¿½ï¿½ï¿½ï¿½ï¿½
 
 	  return 1;
 	}
@@ -165,10 +175,10 @@ uint8_t ground_detectionL(vmc_leg_t *vmc,INS_t *ins)
 	averl[2]=averl[3];
 	averl[3]=vmc->FN;
 	
-	aver_fnl=0.25f*averl[0]+0.25f*averl[1]+0.25f*averl[2]+0.25f*averl[3];//¶ÔÖ§³ÖÁ¦½øĞĞ¾ùÖµÂË²¨
+	aver_fnl=0.25f*averl[0]+0.25f*averl[1]+0.25f*averl[2]+0.25f*averl[3];//ï¿½ï¿½Ö§ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ğ¾ï¿½Öµï¿½Ë²ï¿½
 	
 	if(aver_fnl<3.0f)
-	{//ÀëµØÁË
+	{//ï¿½ï¿½ï¿½ï¿½ï¿½
 	  return 1;
 	}
 	else

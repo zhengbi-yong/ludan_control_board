@@ -1,14 +1,12 @@
 /**
- ******************************************************************************
- * @file	bsp_dwt.h
- * @author  Wang Hongxi
- * @version V1.1.0
- * @date    2022/3/8
- * @brief
- ******************************************************************************
- * @attention
- *
- ******************************************************************************
+ * @file bsp_dwt.h
+ * @author Zhengbi Yong (zhengbi.yong@outlook.com)
+ * @brief 
+ * @version 0.1
+ * @date 2025-11-18
+ * 
+ * Zhengbi Yong
+ * 
  */
 #ifndef _BSP_DWT_H
 #define _BSP_DWT_H

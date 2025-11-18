@@ -1,15 +1,13 @@
 /**
-  ******************************************************************************
-  * @file	 bsp_PWM.c
-  * @author  Wang Hongxi
-  * @version V1.0.0
-  * @date    2020/3/1
-  * @brief   
-  ******************************************************************************
-  * @attention
-  *
-  ******************************************************************************
-  */
+ * @file bsp_PWM.c
+ * @author Zhengbi Yong (zhengbi.yong@outlook.com)
+ * @brief 
+ * @version 0.1
+ * @date 2025-11-18
+ * 
+ * Zhengbi Yong
+ * 
+ */
 #include "bsp_PWM.h"
 
 void TIM_Set_PWM(TIM_HandleTypeDef *tim_pwmHandle, uint8_t Channel, uint16_t value)

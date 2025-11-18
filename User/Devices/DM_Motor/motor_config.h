@@ -1,3 +1,13 @@
+/**
+ * @file motor_config.h
+ * @author Zhengbi Yong (zhengbi.yong@outlook.com)
+ * @brief 
+ * @version 0.1
+ * @date 2025-11-18
+ * 
+ * Zhengbi Yong
+ * 
+ */
 #ifndef __MOTOR_CONFIG_H__
 #define __MOTOR_CONFIG_H__
 #include "can_bsp.h"

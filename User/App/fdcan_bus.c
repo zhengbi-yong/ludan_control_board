@@ -1,3 +1,13 @@
+/**
+ * @file fdcan_bus.c
+ * @author Zhengbi Yong (zhengbi.yong@outlook.com)
+ * @brief 
+ * @version 0.1
+ * @date 2025-11-18
+ * 
+ * Zhengbi Yong
+ * 
+ */
 #include "fdcan_bus.h"
 
 // 声明外部FDCAN句柄

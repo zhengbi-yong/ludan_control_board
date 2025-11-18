@@ -1,14 +1,12 @@
 /**
- ******************************************************************************
- * @file	bsp_dwt.c
- * @author  Wang Hongxi
- * @version V1.1.0
- * @date    2022/3/8
- * @brief
- ******************************************************************************
- * @attention
- *
- ******************************************************************************
+ * @file bsp_dwt.c
+ * @author Zhengbi Yong (zhengbi.yong@outlook.com)
+ * @brief 
+ * @version 0.1
+ * @date 2025-11-18
+ * 
+ * Zhengbi Yong
+ * 
  */
 #include "bsp_dwt.h"
 
@@ -21,13 +19,13 @@ static void DWT_CNT_Update(void);
 
 void DWT_Init(uint32_t CPU_Freq_mHz)
 {
-    /* Ê¹ÄÜDWTÍâÉè */
+    /* Ê¹ï¿½ï¿½DWTï¿½ï¿½ï¿½ï¿½ */
     CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
 
-    /* DWT CYCCNT¼Ä´æÆ÷¼ÆÊýÇå0 */
+    /* DWT CYCCNTï¿½Ä´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½0 */
     DWT->CYCCNT = (uint32_t)0u;
 
-    /* Ê¹ÄÜCortex-M DWT CYCCNT¼Ä´æÆ÷ */
+    /* Ê¹ï¿½ï¿½Cortex-M DWT CYCCNTï¿½Ä´ï¿½ï¿½ï¿½ */
     DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
 
     CPU_FREQ_Hz = CPU_Freq_mHz * 1000000;
@@ -106,7 +104,7 @@ static void DWT_CNT_Update(void)
     volatile uint32_t cnt_now = DWT->CYCCNT;
 
     if (cnt_now < CYCCNT_LAST)
-        CYCCNT_RountCount++;//Òç³ö
+        CYCCNT_RountCount++;//ï¿½ï¿½ï¿½
 
     CYCCNT_LAST = cnt_now;
 }

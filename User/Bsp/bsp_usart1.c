@@ -1,3 +1,13 @@
+/**
+ * @file bsp_usart1.c
+ * @author Zhengbi Yong (zhengbi.yong@outlook.com)
+ * @brief 
+ * @version 0.1
+ * @date 2025-11-18
+ * 
+ * Zhengbi Yong
+ * 
+ */
 #include "bsp_usart1.h"
 #include "fdcan1_task.h"
 

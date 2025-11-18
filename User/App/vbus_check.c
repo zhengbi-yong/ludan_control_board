@@ -1,17 +1,13 @@
 /**
-  *********************************************************************
-  * @file      VBUS_Check_task.c/h
-  * @brief
-  * @note
-  * @history
-  *
-  @verbatim
-  ==============================================================================
-
-  ==============================================================================
-  @endverbatim
-  *********************************************************************
-  */
+ * @file vbus_check.c
+ * @author Zhengbi Yong (zhengbi.yong@outlook.com)
+ * @brief 
+ * @version 0.1
+ * @date 2025-11-18
+ * 
+ * Zhengbi Yong
+ * 
+ */
 #include "vbus_check.h"
 #include "adc.h"
 #include "cmsis_os.h"

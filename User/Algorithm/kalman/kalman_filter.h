@@ -1,14 +1,12 @@
 /**
- ******************************************************************************
- * @file    kalman filter.h
- * @author  Wang Hongxi
- * @version V1.2.2
- * @date    2022/1/8
- * @brief
- ******************************************************************************
- * @attention
- *
- ******************************************************************************
+ * @file kalman_filter.h
+ * @author Zhengbi Yong (zhengbi.yong@outlook.com)
+ * @brief 
+ * @version 0.1
+ * @date 2025-11-18
+ * 
+ * Zhengbi Yong
+ * 
  */
 #ifndef __KALMAN_FILTER_H
 #define __KALMAN_FILTER_H
@@ -49,13 +47,13 @@ typedef struct kf_t
     uint8_t UseAutoAdjustment;
     uint8_t MeasurementValidNum;
 
-    uint8_t *MeasurementMap;      // Á¿²âÓë×´Ì¬µÄ¹ØÏµ how measurement relates to the state
-    float *MeasurementDegree;     // ²âÁ¿Öµ¶ÔÓ¦H¾ØÕóÔªËØÖµ elements of each measurement in H
-    float *MatR_DiagonalElements; // Á¿²â·½²î variance for each measurement
-    float *StateMinVariance;      // ×îÐ¡·½²î ±ÜÃâ·½²î¹ý¶ÈÊÕÁ² suppress filter excessive convergence
+    uint8_t *MeasurementMap;      // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×´Ì¬ï¿½Ä¹ï¿½Ïµ how measurement relates to the state
+    float *MeasurementDegree;     // ï¿½ï¿½ï¿½ï¿½Öµï¿½ï¿½Ó¦Hï¿½ï¿½ï¿½ï¿½Ôªï¿½ï¿½Öµ elements of each measurement in H
+    float *MatR_DiagonalElements; // ï¿½ï¿½ï¿½â·½ï¿½ï¿½ variance for each measurement
+    float *StateMinVariance;      // ï¿½ï¿½Ð¡ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½â·½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ suppress filter excessive convergence
     uint8_t *temp;
 
-    // ÅäºÏÓÃ»§¶¨Òåº¯ÊýÊ¹ÓÃ,×÷Îª±êÖ¾Î»ÓÃÓÚÅÐ¶ÏÊÇ·ñÒªÌø¹ý±ê×¼KFÖÐÎå¸ö»·½ÚÖÐµÄÈÎÒâÒ»¸ö
+    // ï¿½ï¿½ï¿½ï¿½Ã»ï¿½ï¿½ï¿½ï¿½åº¯ï¿½ï¿½Ê¹ï¿½ï¿½,ï¿½ï¿½Îªï¿½ï¿½Ö¾Î»ï¿½ï¿½ï¿½ï¿½ï¿½Ð¶ï¿½ï¿½Ç·ï¿½Òªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×¼KFï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ðµï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½
     uint8_t SkipEq1, SkipEq2, SkipEq3, SkipEq4, SkipEq5;
 
     // definiion of struct mat: rows & cols & pointer to vars
@@ -75,7 +73,7 @@ typedef struct kf_t
 
     int8_t MatStatus;
 
-    // ÓÃ»§¶¨Òåº¯Êý,¿ÉÒÔÌæ»»»òÀ©Õ¹»ù×¼KFµÄ¹¦ÄÜ
+    // ï¿½Ã»ï¿½ï¿½ï¿½ï¿½åº¯ï¿½ï¿½,ï¿½ï¿½ï¿½ï¿½ï¿½æ»»ï¿½ï¿½ï¿½ï¿½Õ¹ï¿½ï¿½×¼KFï¿½Ä¹ï¿½ï¿½ï¿½
     void (*User_Func0_f)(struct kf_t *kf);
     void (*User_Func1_f)(struct kf_t *kf);
     void (*User_Func2_f)(struct kf_t *kf);
@@ -84,7 +82,7 @@ typedef struct kf_t
     void (*User_Func5_f)(struct kf_t *kf);
     void (*User_Func6_f)(struct kf_t *kf);
     
-    // ¾ØÕó´æ´¢¿Õ¼äÖ¸Õë
+    // ï¿½ï¿½ï¿½ï¿½æ´¢ï¿½Õ¼ï¿½Ö¸ï¿½ï¿½
     float *xhat_data, *xhatminus_data;
     float *u_data;
     float *z_data;

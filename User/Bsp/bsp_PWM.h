@@ -1,15 +1,13 @@
 /**
-  ******************************************************************************
-  * @file	 bsp_PWM.h
-  * @author  Wang Hongxi
-  * @version V1.0.0
-  * @date    2020/3/1
-  * @brief   
-  ******************************************************************************
-  * @attention
-  *
-  ******************************************************************************
-  */
+ * @file bsp_PWM.h
+ * @author Zhengbi Yong (zhengbi.yong@outlook.com)
+ * @brief 
+ * @version 0.1
+ * @date 2025-11-18
+ * 
+ * Zhengbi Yong
+ * 
+ */
 #ifndef __BSP_IMU_PWM_H
 #define __BSP_IMU_PWM_H
 

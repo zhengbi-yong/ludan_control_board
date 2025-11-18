@@ -1,15 +1,12 @@
 /**
- ******************************************************************************
- * @file    controller.c
- * @author  Wang Hongxi
- * @author  Zhang Hongyu (fuzzy pid)
- * @version V1.1.3
- * @date    2021/7/3
- * @brief   DWT定时器用于计算控制周期，OLS用于提取信号微分
- ******************************************************************************
- * @attention
- *
- ******************************************************************************
+ * @file controller.c
+ * @author Zhengbi Yong (zhengbi.yong@outlook.com)
+ * @brief 
+ * @version 0.1
+ * @date 2025-11-18
+ * 
+ * Zhengbi Yong
+ * 
  */
 #include "controller.h"
 
