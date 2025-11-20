@@ -143,6 +143,16 @@ static void fdcan_tx_delay(uint32_t delay_ms) {
 #define FDCAN_TX_MAX_ATTEMPTS 100U
 #define FDCAN_TX_RETRY_DELAY_MS 1U
 
+/**
+ * @brief  Map data length to FDCAN Data Length Code (DLC).
+ *
+ * @note   This helper function converts byte length to FDCAN DLC value.
+ *         Supports standard lengths: 0-8, 12, 16, 20, 24, 32, 48, 64 bytes.
+ *         For unsupported lengths, defaults to 8 bytes.
+ *
+ * @param  len Data length in bytes.
+ * @return FDCAN DLC value corresponding to the data length.
+ */
 static uint32_t can_get_dlc(uint32_t len) {
   switch (len) {
   case 0:
@@ -178,46 +188,70 @@ static uint32_t can_get_dlc(uint32_t len) {
   case 64:
     return FDCAN_DLC_BYTES_64;
   default:
-    return FDCAN_DLC_BYTES_8;
+    return FDCAN_DLC_BYTES_8; /* Default to 8 bytes for unsupported lengths */
   }
 }
 
 /**
  * @brief  Send CAN data frame with retry mechanism.
- * @param  hcan CAN handle pointer.
- * @param  id   CAN Identifier.
- * @param  data Data buffer pointer.
- * @param  len  Data length in bytes.
- * @return 0 on success, 1 on failure.
+ *
+ * @note   This function sends a CAN FD frame with the following features:
+ *         - Supports data lengths: 8/12/16/20/24/32/48/64 bytes
+ *         - Enables CAN FD mode with Bit Rate Switch (BRS)
+ *         - Implements retry mechanism when TX FIFO is full
+ *         - Maximum 100 retry attempts with 1ms delay between attempts
+ *
+ * @param  hcan Pointer to FDCAN handle (FDCAN_HandleTypeDef).
+ * @param  id   CAN identifier (standard ID, typically 0x11-0x1F for motor
+ * control).
+ * @param  data Pointer to data buffer to send.
+ * @param  len  Data length in bytes (0-64, will be mapped to appropriate DLC).
+ *
+ * @retval 0 Success - message added to TX FIFO queue.
+ * @retval 1 Failure - exceeded maximum retry attempts.
+ *
+ * @note   The function automatically maps data length to appropriate DLC
+ *         (Data Length Code) value. For unsupported lengths, defaults to 8
+ *         bytes.
+ *
+ * @note   This function is thread-safe when used with FreeRTOS, as it uses
+ *         osDelay() when the kernel is running, or HAL_Delay() otherwise.
  */
 uint8_t canx_send_data(FDCAN_HandleTypeDef *hcan, uint16_t id, uint8_t *data,
                        uint32_t len) {
-  FDCAN_TxHeaderTypeDef TxHeader;
+  FDCAN_TxHeaderTypeDef TxHeader = {0};
 
+  /* Step 1: Configure CAN frame header */
   TxHeader.Identifier = id;
   TxHeader.IdType = FDCAN_STANDARD_ID;
   TxHeader.TxFrameType = FDCAN_DATA_FRAME;
-  TxHeader.DataLength = can_get_dlc(len);
+  TxHeader.DataLength = can_get_dlc(len); /* Map length to DLC */
   TxHeader.ErrorStateIndicator = FDCAN_ESI_ACTIVE;
-  TxHeader.BitRateSwitch = FDCAN_BRS_ON;
-  TxHeader.FDFormat = FDCAN_FD_CAN;
+  TxHeader.BitRateSwitch = FDCAN_BRS_ON; /* Enable Bit Rate Switch for FD */
+  TxHeader.FDFormat = FDCAN_FD_CAN;      /* Enable CAN FD mode */
   TxHeader.TxEventFifoControl = FDCAN_NO_TX_EVENTS;
   TxHeader.MessageMarker = 0;
 
+  /* Step 2: Retry loop - attempt to send message up to MAX_ATTEMPTS times */
   for (uint32_t attempt = 0; attempt < FDCAN_TX_MAX_ATTEMPTS; ++attempt) {
+    /* Check if TX FIFO has free space */
     if (HAL_FDCAN_GetTxFifoFreeLevel(hcan) == 0U) {
+      /* FIFO is full, wait and retry */
       fdcan_tx_delay(FDCAN_TX_RETRY_DELAY_MS);
       continue;
     }
 
+    /* Attempt to add message to TX FIFO queue */
     if (HAL_FDCAN_AddMessageToTxFifoQ(hcan, &TxHeader, data) == HAL_OK) {
-      return 0;
+      return 0; /* Success */
     }
 
+    /* Add message failed, wait and retry */
     fdcan_tx_delay(FDCAN_TX_RETRY_DELAY_MS);
   }
 
-  return 1;
+  /* All retry attempts exhausted */
+  return 1; /* Failure */
 }
 
 int64_t mybuff[MAX_MOTORS_PER_BUS] = {0};
