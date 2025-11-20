@@ -1,12 +1,12 @@
 /**
  * @file can_bsp.c
  * @author Zhengbi Yong (zhengbi.yong@outlook.com)
- * @brief 
+ * @brief
  * @version 0.1
  * @date 2025-11-18
- * 
+ *
  * Zhengbi Yong
- * 
+ *
  */
 #include "can_bsp.h"
 #include "fdcan.h"
@@ -27,60 +27,103 @@ uint8_t g_Can3RxData[64];
 extern fdcan_bus_t fdcan1_bus;
 extern fdcan_bus_t fdcan2_bus;
 
+/**
+ * @brief  Configure FDCAN1 filters, global filters, start FDCAN1, and enable
+ * FIFO0 new message interrupt.
+ *
+ * @note   This function configures FDCAN1 for motor control communication:
+ *         - Sets up range filter for standard IDs 0x11-0x1F (motor feedback
+ * IDs)
+ *         - Configures global filter to reject all remote frames
+ *         - Starts the FDCAN peripheral
+ *         - Activates RX FIFO0 new message interrupt
+ *
+ * @note   All HAL function calls are checked for errors. On failure,
+ * Error_Handler() is called.
+ *
+ * @retval None
+ */
 void FDCAN1_Config(void) {
-  FDCAN_FilterTypeDef sFilterConfig;
-  /* Configure Rx filter */
+  FDCAN_FilterTypeDef sFilterConfig = {0};
+
+  /* Step 1: Configure range filter for standard IDs 0x11-0x1F */
   sFilterConfig.IdType = FDCAN_STANDARD_ID;
   sFilterConfig.FilterIndex = 0;
   sFilterConfig.FilterType = FDCAN_FILTER_RANGE;
   sFilterConfig.FilterConfig = FDCAN_FILTER_TO_RXFIFO0;
-  sFilterConfig.FilterID1 = 0x11; //
-  sFilterConfig.FilterID2 = 0x1F; //
+  sFilterConfig.FilterID1 = 0x11; /* Range start: motor ID 1 */
+  sFilterConfig.FilterID2 = 0x1F; /* Range end: motor ID 15 */
+
   if (HAL_FDCAN_ConfigFilter(&hfdcan1, &sFilterConfig) != HAL_OK) {
     Error_Handler();
   }
 
+  /* Step 2: Configure global filter to reject all remote frames */
   if (HAL_FDCAN_ConfigGlobalFilter(&hfdcan1, FDCAN_REJECT, FDCAN_REJECT,
                                    FDCAN_FILTER_REMOTE,
                                    FDCAN_FILTER_REMOTE) != HAL_OK) {
     Error_Handler();
   }
 
+  /* Step 3: Start FDCAN1 peripheral */
   if (HAL_FDCAN_Start(&hfdcan1) != HAL_OK) {
     Error_Handler();
   }
 
+  /* Step 4: Activate RX FIFO0 new message interrupt notification */
   if (HAL_FDCAN_ActivateNotification(&hfdcan1, FDCAN_IT_RX_FIFO0_NEW_MESSAGE,
                                      0) != HAL_OK) {
     Error_Handler();
   }
 }
 
+/**
+ * @brief  Configure FDCAN2 filters, global filters, start FDCAN2, and enable
+ * FIFO1 new message interrupt.
+ *
+ * @note   This function configures FDCAN2 for motor control communication:
+ *         - Sets up range filter for standard IDs 0x11-0x1F (motor feedback
+ * IDs)
+ *         - Configures global filter to reject all remote frames
+ *         - Starts the FDCAN peripheral
+ *         - Activates RX FIFO1 new message interrupt
+ *
+ * @note   All HAL function calls are checked for errors. On failure,
+ * Error_Handler() is called.
+ *
+ * @note   This function is similar to FDCAN1_Config() but uses FIFO1 instead
+ * of FIFO0 to allow independent processing of messages from two CAN buses.
+ *
+ * @retval None
+ */
 void FDCAN2_Config(void) {
-  FDCAN_FilterTypeDef sFilterConfig;
+  FDCAN_FilterTypeDef sFilterConfig = {0};
 
-  // 接收标准 ID 0x11~0x1F
+  /* Step 1: Configure range filter for standard IDs 0x11-0x1F */
   sFilterConfig.IdType = FDCAN_STANDARD_ID;
   sFilterConfig.FilterIndex = 0;
   sFilterConfig.FilterType = FDCAN_FILTER_RANGE;
   sFilterConfig.FilterConfig = FDCAN_FILTER_TO_RXFIFO1;
-  sFilterConfig.FilterID1 = 0x11; // 范围起始
-  sFilterConfig.FilterID2 = 0x1F; // 范围结束
+  sFilterConfig.FilterID1 = 0x11; /* Range start: motor ID 1 */
+  sFilterConfig.FilterID2 = 0x1F; /* Range end: motor ID 15 */
 
   if (HAL_FDCAN_ConfigFilter(&hfdcan2, &sFilterConfig) != HAL_OK) {
     Error_Handler();
   }
 
+  /* Step 2: Configure global filter to reject all remote frames */
   if (HAL_FDCAN_ConfigGlobalFilter(&hfdcan2, FDCAN_REJECT, FDCAN_REJECT,
                                    FDCAN_FILTER_REMOTE,
                                    FDCAN_FILTER_REMOTE) != HAL_OK) {
     Error_Handler();
   }
 
+  /* Step 3: Start FDCAN2 peripheral */
   if (HAL_FDCAN_Start(&hfdcan2) != HAL_OK) {
     Error_Handler();
   }
 
+  /* Step 4: Activate RX FIFO1 new message interrupt notification */
   if (HAL_FDCAN_ActivateNotification(&hfdcan2, FDCAN_IT_RX_FIFO1_NEW_MESSAGE,
                                      0) != HAL_OK) {
     Error_Handler();
@@ -100,32 +143,64 @@ static void fdcan_tx_delay(uint32_t delay_ms) {
 #define FDCAN_TX_MAX_ATTEMPTS 100U
 #define FDCAN_TX_RETRY_DELAY_MS 1U
 
+static uint32_t can_get_dlc(uint32_t len) {
+  switch (len) {
+  case 0:
+    return FDCAN_DLC_BYTES_0;
+  case 1:
+    return FDCAN_DLC_BYTES_1;
+  case 2:
+    return FDCAN_DLC_BYTES_2;
+  case 3:
+    return FDCAN_DLC_BYTES_3;
+  case 4:
+    return FDCAN_DLC_BYTES_4;
+  case 5:
+    return FDCAN_DLC_BYTES_5;
+  case 6:
+    return FDCAN_DLC_BYTES_6;
+  case 7:
+    return FDCAN_DLC_BYTES_7;
+  case 8:
+    return FDCAN_DLC_BYTES_8;
+  case 12:
+    return FDCAN_DLC_BYTES_12;
+  case 16:
+    return FDCAN_DLC_BYTES_16;
+  case 20:
+    return FDCAN_DLC_BYTES_20;
+  case 24:
+    return FDCAN_DLC_BYTES_24;
+  case 32:
+    return FDCAN_DLC_BYTES_32;
+  case 48:
+    return FDCAN_DLC_BYTES_48;
+  case 64:
+    return FDCAN_DLC_BYTES_64;
+  default:
+    return FDCAN_DLC_BYTES_8;
+  }
+}
+
+/**
+ * @brief  Send CAN data frame with retry mechanism.
+ * @param  hcan CAN handle pointer.
+ * @param  id   CAN Identifier.
+ * @param  data Data buffer pointer.
+ * @param  len  Data length in bytes.
+ * @return 0 on success, 1 on failure.
+ */
 uint8_t canx_send_data(FDCAN_HandleTypeDef *hcan, uint16_t id, uint8_t *data,
                        uint32_t len) {
   FDCAN_TxHeaderTypeDef TxHeader;
 
-  TxHeader.Identifier = id; // CAN ID
+  TxHeader.Identifier = id;
   TxHeader.IdType = FDCAN_STANDARD_ID;
   TxHeader.TxFrameType = FDCAN_DATA_FRAME;
-  if (len <= 8) {
-    TxHeader.DataLength = len;
-  } else if (len == 12) {
-    TxHeader.DataLength = FDCAN_DLC_BYTES_12;
-  } else if (len == 16) {
-    TxHeader.DataLength = FDCAN_DLC_BYTES_16;
-  } else if (len == 20) {
-    TxHeader.DataLength = FDCAN_DLC_BYTES_20;
-  } else if (len == 24) {
-    TxHeader.DataLength = FDCAN_DLC_BYTES_24;
-  } else if (len == 48) {
-    TxHeader.DataLength = FDCAN_DLC_BYTES_48;
-  } else if (len == 64) {
-    TxHeader.DataLength = FDCAN_DLC_BYTES_64;
-  }
-
+  TxHeader.DataLength = can_get_dlc(len);
   TxHeader.ErrorStateIndicator = FDCAN_ESI_ACTIVE;
   TxHeader.BitRateSwitch = FDCAN_BRS_ON;
-  TxHeader.FDFormat = FDCAN_FD_CAN; // CANFD
+  TxHeader.FDFormat = FDCAN_FD_CAN;
   TxHeader.TxEventFifoControl = FDCAN_NO_TX_EVENTS;
   TxHeader.MessageMarker = 0;
 
