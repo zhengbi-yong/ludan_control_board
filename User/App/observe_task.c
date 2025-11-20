@@ -1,12 +1,12 @@
 /**
  * @file observe_task.c
  * @author Zhengbi Yong (zhengbi.yong@outlook.com)
- * @brief 
+ * @brief
  * @version 0.1
  * @date 2025-11-18
- * 
+ *
  * Zhengbi Yong
- * 
+ *
  */
 #include "observe_task.h"
 
@@ -24,7 +24,10 @@ extern send_data_t send_data;
 extern fdcan_bus_t fdcan1_bus;
 extern fdcan_bus_t fdcan2_bus;
 
-uint32_t OBSERVE_TIME = 5;
+/* OBSERVE_TIME = 1 : 640 Hz
+   OBSERVE_TIME = 2 : 320 Hz
+   OBSERVE_TIME = 5 : 160 Hz */
+uint32_t OBSERVE_TIME = 1;
 
 void observe_task_(void) {
   while (1) {
