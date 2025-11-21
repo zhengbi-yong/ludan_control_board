@@ -69,6 +69,7 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     User/App/fdcan_bus.c
     User/App/fdcan1_task.c
     User/App/fdcan2_task.c
+    User/App/motor_cmd.c
     User/App/observe_task.c
     User/App/vbus_check.c
     

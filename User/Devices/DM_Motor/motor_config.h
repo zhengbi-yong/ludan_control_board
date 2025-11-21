@@ -194,6 +194,7 @@ extern float uint_to_float(int x_int, float x_min, float x_max, int bits);
 extern int float_to_uint(float x_float, float x_min, float x_max, int bits);
 
 extern void save_motor_zero(hcan_t *hcan, uint16_t motor_id, uint16_t mode_id);
+extern void clear_motor_error(hcan_t *hcan, uint16_t motor_id, uint16_t mode_id);
 
 extern void dm4310_fbdata_test(Joint_Motor_t *motor, uint8_t *rx_data);
 extern void dm4340_fbdata_test(Joint_Motor_t *motor, uint8_t *rx_data);

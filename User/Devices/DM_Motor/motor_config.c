@@ -472,8 +472,24 @@ void enable_motor_mode(hcan_t *hcan, uint16_t motor_id, uint16_t mode_id) {
   canx_send_data(hcan, id, data, 8);
 }
 
+/**
+ * @brief  Save motor position zero point.
+ *
+ * @note   This function sends a save zero point command to the motor.
+ *         The motor will set the current output shaft position to zero
+ *         and also set the position setpoint to 0.
+ *
+ * @param  hcan     Pointer to FDCAN handle.
+ * @param  motor_id Motor ID (1-16, corresponding to CAN ID 0x11-0x1F).
+ * @param  mode_id  Control mode (MIT_MODE, POS_MODE, or SPEED_MODE).
+ *
+ * @retval None
+ *
+ * @note   Save zero point command format: 0xFF 0xFF 0xFF 0xFF 0xFF 0xFF 0xFF 0xFE
+ * @note   CAN ID = motor_id + mode_id
+ * @note   After sending this command, the motor's current position will be set to zero.
+ */
 void save_motor_zero(hcan_t *hcan, uint16_t motor_id, uint16_t mode_id) {
-  /* Disable command: all 0xFF except last byte 0xFE */
   if (hcan == NULL) {
     return; /* Safety check */
   }
@@ -481,6 +497,7 @@ void save_motor_zero(hcan_t *hcan, uint16_t motor_id, uint16_t mode_id) {
   uint8_t data[8];
   uint16_t id = motor_id + mode_id;
 
+  /* Save zero point command: all 0xFF except last byte 0xFE */
   data[0] = 0xFF;
   data[1] = 0xFF;
   data[2] = 0xFF;
@@ -490,7 +507,7 @@ void save_motor_zero(hcan_t *hcan, uint16_t motor_id, uint16_t mode_id) {
   data[6] = 0xFF;
   data[7] = 0xFE;
 
-  /* Send disable command via CAN */
+  /* Send save zero point command via CAN */
   canx_send_data(hcan, id, data, 8);
 }
 
@@ -528,6 +545,45 @@ void disable_motor_mode(hcan_t *hcan, uint16_t motor_id, uint16_t mode_id) {
   data[6] = 0xFF;
   data[7] = 0xFD;
 
+  canx_send_data(hcan, id, data, 8);
+}
+
+/**
+ * @brief  Clear motor error status.
+ *
+ * @note   This function sends a clear error command to the motor to clear
+ *         error states such as overheating. After clearing errors, the motor
+ *         can resume normal operation.
+ *
+ * @param  hcan     Pointer to FDCAN handle.
+ * @param  motor_id Motor ID (1-16, corresponding to CAN ID 0x11-0x1F).
+ * @param  mode_id  Control mode (MIT_MODE, POS_MODE, or SPEED_MODE).
+ *
+ * @retval None
+ *
+ * @note   Clear error command format: 0xFF 0xFF 0xFF 0xFF 0xFF 0xFF 0xFF 0xFB
+ * @note   CAN ID = motor_id + mode_id
+ * @note   This command can clear motor errors such as overheating.
+ */
+void clear_motor_error(hcan_t *hcan, uint16_t motor_id, uint16_t mode_id) {
+  if (hcan == NULL) {
+    return; /* Safety check */
+  }
+
+  uint8_t data[8];
+  uint16_t id = motor_id + mode_id;
+
+  /* Clear error command: all 0xFF except last byte 0xFB */
+  data[0] = 0xFF;
+  data[1] = 0xFF;
+  data[2] = 0xFF;
+  data[3] = 0xFF;
+  data[4] = 0xFF;
+  data[5] = 0xFF;
+  data[6] = 0xFF;
+  data[7] = 0xFB;
+
+  /* Send clear error command via CAN */
   canx_send_data(hcan, id, data, 8);
 }
 
