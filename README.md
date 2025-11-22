@@ -83,6 +83,7 @@
 | FDCAN2_TASK | High | 512×4 bytes | CAN2总线电机控制 |
 | OBSERVE_TASK | High | 512×4 bytes | 数据观测与发送 |
 | VBUS_CHECK_TASK | Normal | 512×4 bytes | 电压检测与保护 |
+| MOTOR_CMD_TASK | High | 512×4 bytes | 电机命令处理（USB CDC命令） |
 
 ---
 
@@ -97,6 +98,7 @@ graph TB
         FDCAN2_TASK[FDCAN2_TASK<br/>CAN2电机控制]
         OBSERVE_TASK[OBSERVE_TASK<br/>数据观测]
         VBUS_TASK[VBUS_CHECK_TASK<br/>电压检测]
+        CMD_TASK[MOTOR_CMD_TASK<br/>命令处理]
     end
     
     subgraph "设备驱动层 (Devices)"
@@ -154,12 +156,14 @@ flowchart LR
         CAN_RX[CAN接收<br/>电机反馈]
         ADC[ADC采集<br/>电压检测]
         IMU[IMU传感器<br/>姿态数据]
+        USB_CMD[USB CDC<br/>命令接收]
     end
     
     subgraph "处理"
         MOTOR_PARSE[电机数据解析]
         CTRL_ALGO[控制算法<br/>PID/前馈/LDOB]
         FILTER[滤波算法<br/>EKF/Kalman]
+        CMD_PROCESS[命令处理<br/>使能/失能/清零]
     end
     
     subgraph "输出"
@@ -180,6 +184,10 @@ flowchart LR
     
     IMU --> FILTER
     FILTER --> USB
+    
+    USB_CMD --> CMD_PROCESS
+    CMD_PROCESS --> CAN_TX
+    CMD_PROCESS --> USB
 ```
 
 ### 模块依赖关系
@@ -190,6 +198,7 @@ flowchart LR
 | FDCAN2_TASK | CAN_BSP, DM_Motor, user_lib | CAN2任务依赖CAN BSP和电机驱动 |
 | OBSERVE_TASK | DM_Motor, USB_DEVICE | 观测任务依赖电机数据和USB |
 | VBUS_CHECK_TASK | HAL_ADC | 电压检测依赖HAL ADC |
+| MOTOR_CMD_TASK | DM_Motor, USB_DEVICE, FreeRTOS | 命令处理依赖电机驱动、USB和FreeRTOS队列 |
 | DM_Motor | CAN_BSP, user_lib | 电机驱动依赖CAN BSP |
 | BMI088 | HAL_SPI | IMU驱动依赖HAL SPI |
 | Controller | user_lib, arm_math | 控制器依赖工具库和数学库 |
@@ -231,6 +240,7 @@ ludan_control_board/
 │   │   ├── fdcan_bus.c/h          # CAN总线管理
 │   │   ├── fdcan1_task.c/h        # CAN1任务
 │   │   ├── fdcan2_task.c/h        # CAN2任务
+│   │   ├── motor_cmd.c/h          # 电机命令处理（USB CDC）
 │   │   ├── observe_task.c/h       # 观测任务
 │   │   └── vbus_check.c/h         # 电压检测任务
 │   │
@@ -470,6 +480,71 @@ void Feedforward_Init(Feedforward_t *ffc, float max_out, float *c,
  * @return 前馈输出
  */
 float Feedforward_Calculate(Feedforward_t *ffc, float ref);
+```
+
+### 命令处理接口
+
+#### 命令处理任务接口
+
+```c
+/**
+ * @brief 电机命令处理任务主函数
+ * @note FreeRTOS任务，从命令队列取命令并处理
+ * @thread_safety 线程安全，通过队列同步
+ */
+void motor_cmd_task_(void);
+```
+
+#### 命令解析接口
+
+```c
+/**
+ * @brief 解析和验证命令帧
+ * @param frame 命令帧指针（16字节）
+ * @param len 数据长度
+ * @param cmd_id 输出：命令ID
+ * @param op_type 输出：操作类型
+ * @param motor_id 输出：电机ID
+ * @retval 0: 有效, 非0: 无效
+ */
+uint8_t motor_cmd_parse(const uint8_t *frame, uint32_t len, 
+                        uint8_t *cmd_id, uint8_t *op_type, uint8_t *motor_id);
+```
+
+#### 命令执行接口
+
+```c
+/**
+ * @brief 执行单电机命令
+ * @param cmd_id 命令ID
+ * @param motor_id 全局电机ID (1-30)
+ * @retval 状态码
+ */
+uint8_t motor_cmd_execute_single(uint8_t cmd_id, uint8_t motor_id);
+
+/**
+ * @brief 执行所有电机命令（批量操作）
+ * @param cmd_id 命令ID
+ * @retval 状态码
+ * @note 顺序执行：先fdcan1_bus所有电机，再fdcan2_bus所有电机
+ *       每个电机操作后延迟5ms，避免CAN总线拥堵
+ */
+uint8_t motor_cmd_execute_all(uint8_t cmd_id);
+```
+
+#### 响应发送接口
+
+```c
+/**
+ * @brief 发送响应帧
+ * @param cmd_id 命令ID
+ * @param status 状态码
+ * @param op_type 操作类型
+ * @param motor_id 电机ID (0xFF表示所有电机)
+ * @retval 0: 成功, 非0: 失败
+ */
+uint8_t motor_cmd_send_response(uint8_t cmd_id, uint8_t status, 
+                                 uint8_t op_type, uint8_t motor_id);
 ```
 
 ### 任务接口
@@ -1198,6 +1273,139 @@ arm-none-eabi-gdb build/Debug/ludan_control_board.elf
 
 ---
 
+## 🔌 USB CDC命令使用指南
+
+### 连接设备
+
+1. **硬件连接**
+   - 使用USB线连接控制板的USB接口到PC
+   - 确保驱动已正确安装（Windows会自动识别为COM端口）
+
+2. **串口配置**
+   - 波特率：921600
+   - 数据位：8
+   - 停止位：1
+   - 校验位：无
+   - 流控：无
+
+### 命令协议使用
+
+#### Python示例脚本
+
+**使能所有电机**:
+```python
+import serial
+
+ser = serial.Serial('COM3', 921600)
+
+# 构造命令帧（16字节）
+cmd = bytearray(16)
+cmd[0] = 0x7C  # 帧头
+cmd[1] = 0x01  # 命令ID: 使能
+cmd[2] = 0xFF  # 操作类型: 所有电机
+cmd[3] = 0xFF  # 电机ID: 所有电机
+cmd[15] = sum(cmd[:15]) & 0xFF  # 校验和
+
+# 发送命令
+ser.write(cmd)
+
+# 接收响应（8字节）
+response = ser.read(8)
+if response[0] == 0x7D and response[2] == 0x00:
+    print("使能成功")
+```
+
+**使能单个电机**:
+```python
+motor_id = 1  # 电机ID: 1-30
+
+cmd = bytearray(16)
+cmd[0] = 0x7C
+cmd[1] = 0x01  # 使能命令
+cmd[2] = 0x00  # 单电机操作
+cmd[3] = motor_id
+cmd[15] = sum(cmd[:15]) & 0xFF
+
+ser.write(cmd)
+response = ser.read(8)
+```
+
+**失能所有电机**:
+```python
+cmd[1] = 0x02  # 失能命令
+# 其他字段相同
+```
+
+**保存位置零点**:
+```python
+cmd[1] = 0x03  # 保存零点命令
+# 警告：此操作会将当前位置设置为零点
+```
+
+**清除错误**:
+```python
+cmd[1] = 0x04  # 清除错误命令
+```
+
+### 命令响应解析
+
+```python
+def parse_response(response):
+    """解析响应帧"""
+    if len(response) != 8:
+        return None
+    
+    if response[0] != 0x7D:  # 响应帧头
+        return None
+    
+    # 验证校验和
+    checksum = sum(response[:7]) & 0xFF
+    if checksum != response[7]:
+        return None
+    
+    cmd_id = response[1]
+    status = response[2]
+    op_type = response[3]
+    motor_id = response[4]
+    
+    status_names = {
+        0x00: "成功",
+        0x01: "无效命令",
+        0x02: "无效电机ID",
+        0x03: "校验和错误",
+        0x04: "执行失败"
+    }
+    
+    return {
+        'cmd_id': cmd_id,
+        'status': status,
+        'status_name': status_names.get(status, "未知"),
+        'op_type': op_type,
+        'motor_id': motor_id
+    }
+```
+
+### 常见问题
+
+**Q: 发送命令后没有收到响应？**
+- 检查串口连接是否正常
+- 确认波特率设置正确（921600）
+- 检查命令帧格式和校验和是否正确
+- 确认控制板已启动并运行
+
+**Q: 收到响应但状态码不是0x00？**
+- `0x01`: 检查命令ID是否在0x01-0x04范围内
+- `0x02`: 检查电机ID是否在1-30范围内
+- `0x03`: 检查校验和计算是否正确
+- `0x04`: 可能是CAN发送失败或总线未初始化
+
+**Q: 批量操作需要多长时间？**
+- 批量操作（所有电机）需要约150-200ms
+- 每个电机操作后延迟5ms，30个电机共150ms
+- 加上处理时间，总延迟约200ms
+
+---
+
 ## 💻 算法伪代码
 
 ### PID控制算法
@@ -1682,6 +1890,424 @@ speed_ctrl(hcan, motor_id, vel);
 
 ---
 
+## 📦 模块详细说明
+
+### 1. CAN总线管理模块 (`fdcan_bus.c/h`)
+
+**功能**: 管理CAN总线和电机数组，提供统一的总线抽象接口
+
+**核心数据结构**:
+```c
+typedef struct {
+    FDCAN_HandleTypeDef *hfdcan;        // FDCAN句柄指针
+    Joint_Motor_t motor[MAX_MOTORS_PER_BUS];  // 电机数组（最多16个）
+    uint8_t motor_count;                // 当前电机数量（0-16）
+    uint8_t start_flag;                 // 启动标志（0=未启动，1=已启动）
+} fdcan_bus_t;
+```
+
+**全局对象**:
+- `fdcan1_bus`: FDCAN1总线对象，绑定到`&hfdcan1`
+- `fdcan2_bus`: FDCAN2总线对象，绑定到`&hfdcan2`
+
+**使用方法**:
+```c
+// 访问FDCAN1总线的第i个电机
+Joint_Motor_t *motor = &fdcan1_bus.motor[i];
+float position = motor->para.pos;
+float velocity = motor->para.vel;
+float torque = motor->para.tor;
+
+// 检查总线是否已启动
+if (fdcan1_bus.start_flag == 1) {
+    // 总线已就绪，可以发送控制命令
+}
+```
+
+**注意事项**:
+- 线程安全：多个任务可能同时访问，注意数据同步
+- `motor_count`默认为15，可根据实际连接电机数量调整
+- `start_flag`在`fdcan1_init()`或`fdcan2_init()`中设置为1
+
+---
+
+### 2. CAN总线BSP模块 (`can_bsp.c/h`)
+
+**功能**: 提供CAN总线的底层配置和数据发送接口
+
+**核心函数**:
+
+#### `FDCAN1_Config()` / `FDCAN2_Config()`
+- **功能**: 配置FDCAN过滤器和中断
+- **配置内容**:
+  - 范围过滤器：标准ID 0x11-0x1F（电机反馈ID）
+  - 全局过滤器：拒绝所有远程帧
+  - 启动FDCAN外设
+  - 激活接收FIFO中断（FDCAN1用FIFO0，FDCAN2用FIFO1）
+- **调用时机**: 系统初始化阶段，在任务启动前
+
+#### `canx_send_data()`
+- **功能**: 发送CAN数据帧，支持重试机制
+- **参数**:
+  - `hcan`: FDCAN句柄指针
+  - `id`: CAN标识符（标准ID）
+  - `data`: 数据缓冲区
+  - `len`: 数据长度（0-8, 12, 16, 20, 24, 32, 48, 64字节）
+- **特性**:
+  - 支持CAN FD模式，BRS使能
+  - 自动重试机制（最多100次，每次延迟1ms）
+  - 检查TX FIFO空闲空间
+- **返回值**: 0=成功，1=失败
+
+**使用示例**:
+```c
+uint8_t data[8] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFC};
+uint16_t can_id = 0x001;  // 电机1，MIT模式
+
+if (canx_send_data(&hfdcan1, can_id, data, 8) == 0) {
+    // 发送成功
+} else {
+    // 发送失败（FIFO满或重试超限）
+}
+```
+
+---
+
+### 3. 电机驱动模块 (`motor_config.c/h`)
+
+**功能**: 提供DM电机的控制命令和反馈解析功能
+
+**核心函数**:
+
+#### 电机初始化
+```c
+void joint_motor_init(Joint_Motor_t *motor, uint16_t id, uint16_t mode);
+```
+- **功能**: 初始化电机结构体，设置ID和控制模式
+- **参数**: 
+  - `motor`: 电机结构体指针
+  - `id`: 电机ID（1-16）
+  - `mode`: 控制模式（MIT_MODE, POS_MODE, SPEED_MODE）
+
+#### 电机使能/失能
+```c
+void enable_motor_mode(hcan_t *hcan, uint16_t motor_id, uint16_t mode_id);
+void disable_motor_mode(hcan_t *hcan, uint16_t motor_id, uint16_t mode_id);
+```
+- **功能**: 发送使能/失能命令
+- **命令格式**: 前7字节0xFF，最后1字节为命令码（0xFC=使能，0xFD=失能）
+
+#### 保存位置零点
+```c
+void save_motor_zero(hcan_t *hcan, uint16_t motor_id, uint16_t mode_id);
+```
+- **功能**: 将电机当前位置设置为零点
+- **命令格式**: 前7字节0xFF，最后1字节0xFE
+
+#### 清除错误
+```c
+void clear_motor_error(hcan_t *hcan, uint16_t motor_id, uint16_t mode_id);
+```
+- **功能**: 清除电机错误状态（如过热等）
+- **命令格式**: 前7字节0xFF，最后1字节0xFB
+
+#### MIT模式控制
+```c
+void mit_ctrl(hcan_t *hcan, uint16_t motor_id, 
+              float pos, float vel, float kp, float kd, float torq);
+```
+- **功能**: 发送MIT模式控制命令
+- **参数范围**（以DM4310为例）:
+  - `pos`: -12.5 到 12.5 rad
+  - `vel`: -30.0 到 30.0 rad/s
+  - `kp`: 0.0 到 500.0
+  - `kd`: 0.0 到 5.0
+  - `torq`: -10.0 到 10.0 N·m
+
+#### 反馈数据解析
+```c
+void dm4310_fbdata(Joint_Motor_t *motor, uint8_t *rx_data, uint32_t len);
+void dm4340_fbdata(Joint_Motor_t *motor, uint8_t *rx_data, uint32_t len);
+// ... 其他型号的解析函数
+```
+- **功能**: 解析8字节反馈帧，更新电机参数
+- **反馈数据格式**:
+  - 字节0: [错误码(4位)] [电机ID(4位)]
+  - 字节1-2: 位置（16位，有符号）
+  - 字节3-4: 速度（12位，压缩编码）
+  - 字节4-5: 力矩（12位，压缩编码）
+  - 字节6: MOS温度（°C）
+  - 字节7: 线圈温度（°C）
+
+**使用示例**:
+```c
+// 初始化电机
+Joint_Motor_t motor;
+joint_motor_init(&motor, 1, MIT_MODE);
+
+// 使能电机
+enable_motor_mode(&hfdcan1, 1, MIT_MODE);
+
+// 发送控制命令
+mit_ctrl(&hfdcan1, 1, 0.0f, 0.0f, 50.0f, 2.0f, 0.0f);
+
+// 在CAN中断回调中解析反馈
+void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs) {
+    uint8_t rx_data[8];
+    HAL_FDCAN_GetRxMessage(hfdcan, FDCAN_RX_FIFO0, &RxHeader, rx_data);
+    dm4310_fbdata(&fdcan1_bus.motor[0], rx_data, 8);
+}
+```
+
+---
+
+### 4. FDCAN1/FDCAN2任务模块 (`fdcan1_task.c/h`, `fdcan2_task.c/h`)
+
+**功能**: 实现CAN总线的电机控制任务，周期性发送控制命令
+
+**任务流程**:
+1. **系统稳定等待**: 延迟500ms，等待系统初始化完成
+2. **总线初始化**: 调用`fdcan1_init()`或`fdcan2_init()`
+   - 初始化所有电机参数
+   - 逐个使能电机（最多重试20次）
+   - 设置`start_flag = 1`
+3. **反馈数据初始化**: 调用各型号的`dm***_fbdata_init()`函数
+4. **控制循环**: 
+   - 遍历所有电机，发送MIT控制命令
+   - 延迟`CHASSR_TIME`或`CHASSL_TIME`（默认1ms，1kHz频率）
+
+**关键参数**:
+- `MOTOR_ENABLE_MAX_RETRY`: 20（电机使能最大重试次数）
+- `MOTOR_ENABLE_INTERVAL_MS`: 25ms（重试间隔）
+- `CHASSR_TIME`: 1ms（FDCAN1控制周期）
+- `CHASSL_TIME`: 1ms（FDCAN2控制周期）
+
+**并行运行**: FDCAN1和FDCAN2任务可并行运行，无资源冲突
+
+**使用注意事项**:
+- 任务优先级为High，确保实时性
+- 控制频率由`CHASSR_TIME`/`CHASSL_TIME`控制，可调整
+- 电机使能失败不会阻塞其他电机初始化
+
+---
+
+### 5. 数据观测任务模块 (`observe_task.c/h`)
+
+**功能**: 收集所有电机数据，打包后通过USB CDC发送，用于实时监控和调试
+
+**数据帧格式**:
+- **总长度**: 152字节
+- **帧头**: 0x7B（1字节）
+- **电机数据**: 每电机5字节（最多30个电机）
+  - 位置：2字节（16位，大端序）
+  - 速度：1.5字节（12位压缩编码）
+  - 力矩：1.5字节（12位压缩编码）
+- **校验和**: 1字节（前151字节累加和）
+
+**数据打包顺序**:
+1. 先打包FDCAN1总线的所有电机（motor_count个）
+2. 再打包FDCAN2总线的所有电机（motor_count个）
+3. 最多30个电机（每条总线15个）
+
+**采样频率**:
+- 由`OBSERVE_TIME`控制（默认1ms，640Hz）
+- 可调整：`OBSERVE_TIME = 2` → 320Hz，`OBSERVE_TIME = 5` → 160Hz
+
+**使用场景**:
+- 实时监控电机状态
+- 数据记录和分析
+- 调试和故障诊断
+
+**上位机接收示例**（Python）:
+```python
+import serial
+
+ser = serial.Serial('COM3', 921600)
+frame = ser.read(152)
+
+if frame[0] == 0x7B:  # 帧头
+    # 解析电机数据
+    for i in range(30):
+        offset = 1 + i * 5
+        pos = (frame[offset] << 8) | frame[offset + 1]
+        vel = (frame[offset + 2] << 4) | (frame[offset + 3] >> 4)
+        tor = ((frame[offset + 3] & 0x0F) << 8) | frame[offset + 4]
+```
+
+---
+
+### 6. 电压检测任务模块 (`vbus_check.c/h`)
+
+**功能**: 实时监测系统总线电压，实现低电压报警和保护
+
+**电压计算公式**:
+```c
+vbus = ((adc_val[1] + calibration_value) * 3.3f / 65535.0f) * 11.0f
+```
+- `adc_val[1]`: ADC通道1原始值（分压器输入）
+- `calibration_value`: ADC偏移校准值（默认378）
+- `3.3V`: ADC参考电压
+- `65535`: 最大ADC值（16位）
+- `11.0`: 分压比（1/11分压器）
+
+**保护逻辑**:
+- **正常电压** (`vbus >= 22.2V`):
+  - `loss_voltage = 0`
+  - 电源输出开启（Power_OUT1_ON, Power_OUT2_ON）
+  - 蜂鸣器关闭
+
+- **低电压警告** (`6.0V < vbus < 22.6V`):
+  - 蜂鸣器报警（Buzzer_ON）
+
+- **严重低电压** (`6.0V < vbus < 22.2V`):
+  - `loss_voltage = 1`
+  - 电源输出关闭（Power_OUT1_OFF, Power_OUT2_OFF）
+  - 禁用所有电机（FDCAN1和FDCAN2上的所有电机）
+  - 蜂鸣器报警
+
+**关键参数**:
+- `VBUS_MIN_VALID`: 6.0V（最小有效电压）
+- `vbus_threhold_disable`: 22.2V（低电压保护阈值）
+- `vbus_threhold_call`: 22.6V（报警阈值）
+- 监控频率：100Hz（10ms周期）
+
+**全局变量**:
+- `loss_voltage`: 低电压标志（0=正常，1=低电压）
+  - 其他任务可检查此标志，决定是否继续运行
+
+**使用示例**:
+```c
+// 在其他任务中检查电压状态
+if (loss_voltage == 1) {
+    // 低电压保护已激活，停止控制
+    return;
+}
+```
+
+---
+
+### 7. 命令处理模块 (`motor_cmd.c/h`)
+
+**功能**: 处理通过USB CDC接收的电机控制命令，支持单电机和批量操作
+
+**命令处理流程**:
+```
+上位机 → USB CDC → CDC_Receive_HS() → 命令队列 → MOTOR_CMD_TASK → 电机控制函数 → CAN发送
+                                                                    ↓
+                                                              响应帧 → USB CDC → 上位机
+```
+
+**核心函数**:
+
+#### `motor_cmd_task_()`
+- **功能**: FreeRTOS任务主函数，从命令队列取命令并处理
+- **执行流程**:
+  1. 从队列阻塞等待命令（`osMessageQueueGet`）
+  2. 解析命令帧（`motor_cmd_parse`）
+  3. 验证命令参数（命令ID、操作类型、电机ID）
+  4. 执行命令（单电机或批量）
+  5. 发送响应帧（`motor_cmd_send_response`）
+
+#### `motor_cmd_execute_single()`
+- **功能**: 执行单电机命令
+- **电机ID映射**:
+  - 1-15 → `fdcan1_bus`，局部ID = 全局ID - 1
+  - 16-30 → `fdcan2_bus`，局部ID = 全局ID - 16
+
+#### `motor_cmd_execute_all()`
+- **功能**: 执行批量操作（所有电机）
+- **执行顺序**:
+  1. 遍历`fdcan1_bus`的所有电机（0 到 motor_count-1）
+  2. 每个电机操作后延迟5ms（避免CAN总线拥堵）
+  3. 遍历`fdcan2_bus`的所有电机
+  4. 每个电机操作后延迟5ms
+
+**支持的命令**:
+- `CMD_ENABLE_MOTOR (0x01)`: 使能电机
+- `CMD_DISABLE_MOTOR (0x02)`: 失能电机
+- `CMD_SAVE_ZERO (0x03)`: 保存位置零点
+- `CMD_CLEAR_ERROR (0x04)`: 清除错误
+
+**FreeRTOS资源**:
+- **命令队列**: `motor_cmd_queue`
+  - 深度：8个消息
+  - 消息大小：16字节（命令帧大小）
+- **任务优先级**: High（与电机控制任务同级）
+
+**使用示例**（上位机Python）:
+```python
+import serial
+
+ser = serial.Serial('COM3', 921600)
+
+# 构造使能所有电机命令
+cmd = bytearray(16)
+cmd[0] = 0x7C  # 帧头
+cmd[1] = 0x01  # 命令ID: 使能
+cmd[2] = 0xFF  # 操作类型: 所有电机
+cmd[3] = 0xFF  # 电机ID: 所有电机
+cmd[15] = sum(cmd[:15]) & 0xFF  # 校验和
+
+# 发送命令
+ser.write(cmd)
+
+# 接收响应（8字节）
+response = ser.read(8)
+if response[2] == 0x00:
+    print("命令执行成功")
+```
+
+**错误处理**:
+- 无效命令ID：返回`STATUS_INVALID_CMD`
+- 无效电机ID：返回`STATUS_INVALID_MOTOR_ID`
+- 校验和错误：返回`STATUS_CHECKSUM_ERROR`
+- 执行失败：返回`STATUS_EXEC_FAIL`
+
+**向后兼容性**:
+- 保持旧协议支持（帧头0x7B，11字节测试帧）
+- 新协议（帧头0x7C，16字节命令帧）和旧协议可同时使用
+
+---
+
+### 8. USB CDC接口模块 (`usbd_cdc_if.c`)
+
+**功能**: 实现USB CDC通信接口，处理数据接收和发送
+
+**核心函数**:
+
+#### `CDC_Receive_HS()`
+- **功能**: USB数据接收回调函数
+- **处理逻辑**:
+  1. 检测命令帧（帧头0x7C，长度16字节）→ 放入命令队列
+  2. 检测旧协议帧（帧头0x7B，长度11字节）→ 按原有逻辑处理
+  3. 其他数据 → 丢弃
+
+#### `CDC_Transmit_HS()`
+- **功能**: USB数据发送函数
+- **使用场景**:
+  - 发送观测数据帧（`observe_task_`调用）
+  - 发送命令响应帧（`motor_cmd_send_response`调用）
+
+**数据流**:
+- **上行**（设备→主机）: 观测数据帧（152字节）
+- **下行**（主机→设备）: 命令帧（16字节）
+
+---
+
+### 9. 工具库模块 (`user_lib.c/h`)
+
+**功能**: 提供通用工具函数，包括数学运算、滤波、约束等
+
+**核心函数**:
+- `ramp()`: 斜坡函数
+- `deadband()`: 死区函数
+- `constrain()`: 限幅函数
+- `OLS()`: 最小二乘法
+
+**使用场景**: 控制器算法、数据处理、信号滤波
+
+---
+
 ## 🔬 控制算法库
 
 ### PID控制器
@@ -1802,6 +2428,115 @@ u_total(k) = u_control(k) - d̂(k)
 ---
 
 ## 🎬 典型应用场景
+
+### 场景1: 通过上位机控制电机
+
+**需求**: 上位机需要远程控制电机，包括使能、失能、保存零点、清除错误等操作
+
+**实现方案**:
+1. 上位机通过USB CDC发送16字节命令帧
+2. 控制板接收命令并放入队列
+3. `MOTOR_CMD_TASK`处理命令并执行
+4. 返回8字节响应帧确认执行结果
+
+**Python示例**:
+```python
+import serial
+import time
+
+# 连接控制板
+ser = serial.Serial('COM3', 921600, timeout=1.0)
+
+def send_command(cmd_id, op_type, motor_id=0xFF):
+    """发送命令并接收响应"""
+    cmd = bytearray(16)
+    cmd[0] = 0x7C  # 帧头
+    cmd[1] = cmd_id
+    cmd[2] = op_type
+    cmd[3] = motor_id
+    cmd[15] = sum(cmd[:15]) & 0xFF  # 校验和
+    
+    ser.write(cmd)
+    response = ser.read(8)
+    
+    if response and response[0] == 0x7D:
+        status = response[2]
+        return status == 0x00
+    return False
+
+# 使能所有电机
+if send_command(0x01, 0xFF, 0xFF):
+    print("所有电机已使能")
+
+# 使能单个电机（ID=1）
+if send_command(0x01, 0x00, 1):
+    print("电机1已使能")
+
+# 保存位置零点
+if send_command(0x03, 0xFF, 0xFF):
+    print("所有电机位置零点已保存")
+
+# 清除错误
+if send_command(0x04, 0xFF, 0xFF):
+    print("所有电机错误已清除")
+```
+
+### 场景2: 多关节机器人控制
+
+**需求**: 控制多关节机器人，每个关节一个电机，需要统一使能和失能
+
+**实现方案**:
+- 使用批量操作命令（操作类型0xFF）
+- 一条命令控制所有电机，简化上位机逻辑
+- 响应时间约200ms（30个电机 × 5ms延迟）
+
+**使用流程**:
+```
+1. 系统上电
+   ↓
+2. 上位机发送"使能所有电机"命令
+   ↓
+3. 控制板使能所有电机（FDCAN1和FDCAN2）
+   ↓
+4. 开始控制循环（通过FDCAN1_TASK和FDCAN2_TASK）
+   ↓
+5. 需要停止时，发送"失能所有电机"命令
+```
+
+### 场景3: 电机位置标定
+
+**需求**: 在机器人装配完成后，需要将当前位置设置为零点
+
+**实现方案**:
+- 手动将机器人移动到标定位置
+- 通过上位机发送"保存位置零点"命令
+- 所有电机将当前位置设置为零点
+
+**注意事项**:
+- 此操作不可逆，需要确认
+- 建议在系统初始化时执行
+- 可以单独对某个电机执行（使用单电机操作）
+
+### 场景4: 错误恢复
+
+**需求**: 电机因过热等原因进入错误状态，需要清除错误后继续运行
+
+**实现方案**:
+1. 检测到电机错误（通过反馈数据中的状态码）
+2. 上位机发送"清除错误"命令
+3. 电机清除错误状态，恢复正常运行
+
+**错误检测**:
+```python
+# 从观测数据中检测错误
+frame = ser.read(152)  # 观测数据帧
+# 解析电机反馈，检查状态码
+# 如果状态码非0，表示有错误
+```
+
+---
+
+## 🎬 典型应用场景（原有内容）
 
 ### 场景1: 多关节机器人控制
 
@@ -2595,5 +3330,5 @@ typedef enum {
 
 ---
 
-**最后更新**: 2025-01-XX
+**最后更新**: 2025-11-22
 
